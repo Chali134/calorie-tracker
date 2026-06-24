@@ -609,19 +609,21 @@ input:focus, select:focus { outline: none; }
 /* ── Enhanced Progress Bar Animation ────────────── */
 .weekly-bar {
     background: #FF6B3D;
-    opacity: 0.75;
+    opacity: 0.8;
     transition: all 0.25s var(--ease-out-expo);
-    min-width: 16px;
+    min-width: 14px;
     position: relative;
+    border: 1px solid #2A2A2A;
 }
 .weekly-bar.today {
     background: #2ECC71;
     opacity: 0.9;
-    box-shadow: inset 0 -2px 0 rgba(46, 204, 113, 0.3);
+    border: 1px solid #2ECC71;
 }
 .weekly-bar:hover {
     opacity: 1;
-    transform: scaleY(1.05);
+    transform: scaleY(1.08);
+    border-color: #FF6B3D;
 }
 .weekly-bar::before {
     content: attr(data-value);
@@ -635,8 +637,8 @@ input:focus, select:focus { outline: none; }
     color: #FF6B3D;
     font-size: 10px;
     font-weight: 700;
-    padding: 3px 6px;
-    margin-bottom: 4px;
+    padding: 4px 8px;
+    margin-bottom: 6px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
@@ -721,7 +723,7 @@ input:focus, select:focus { outline: none; }
     animation: slideUp 0.5s var(--ease-out-expo);
 }
 .ring-container svg {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    /* No shadow - pure brutalism */
 }
 .ring-bg {
     stroke: #2A2A2A;
@@ -729,7 +731,6 @@ input:focus, select:focus { outline: none; }
 }
 .ring-fill {
     stroke-linecap: round;
-    filter: drop-shadow(0 0 8px rgba(255, 107, 61, 0.2));
     transition: stroke-dashoffset 0.8s var(--ease-out-expo);
 }
 .ring-center {
@@ -1093,12 +1094,12 @@ button:active {
         padding: 24px 32px;
     }
     
-    /* Enhanced ring for desktop */
+    /* Pure brutalism - no shadows */
     .ring-container svg {
-        filter: drop-shadow(0 4px 12px rgba(255, 107, 61, 0.15));
+        /* No drop shadow */
     }
     .ring-fill {
-        filter: drop-shadow(0 0 12px rgba(255, 107, 61, 0.25));
+        /* No filter */
     }
     
     /* Better input styling on desktop */
