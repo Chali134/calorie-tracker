@@ -266,28 +266,29 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     border: none;
     color: #555;
     cursor: pointer;
-    padding: 6px 0;
-    transition: all 0.2s var(--ease-out);
-    min-height: 40px;
+    padding: 2px 0;
+    transition: color 0.2s var(--ease-out);
+    min-height: 44px;
 }
 .nav-item:active { transform: scale(0.92); opacity: 0.6; }
-.nav-item .nav-icon {
-    width: 26px; height: 26px;
-    transition: all 0.2s var(--ease-out);
-}
-.nav-item.active .nav-icon-bg {
-    background: #FF6B3D;
-    width: 44px;
-    height: 44px;
+.nav-icon-bg {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: bounceIn 0.4s var(--ease-spring);
+    width: 44px;
+    height: 44px;
+    transition: background 0.2s var(--ease-out);
+}
+.nav-item.active .nav-icon-bg {
+    background: #FF6B3D;
+}
+.nav-item .nav-icon {
+    width: 24px; height: 24px;
+    transition: color 0.2s var(--ease-out);
 }
 .nav-item.active .nav-icon {
     color: #fff;
     stroke: #fff;
-    width: 24px; height: 24px;
 }
 
 /* ── Nav add button (brutalist square) ── */
@@ -304,8 +305,9 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     justify-content: center;
     transition: transform 0.2s var(--ease-spring), opacity 0.15s;
 }
+.nav-item-add:hover { transform: scale(1.06); }
 .nav-item-add:active { transform: scale(0.88); opacity: 0.6; }
-.nav-item-add svg { width: 26px; height: 26px; stroke: #fff; }
+.nav-item-add svg { width: 24px; height: 24px; stroke: #fff; }
 
 /* ── Modal ──────────────────────────────── */
 .modal-overlay {
