@@ -605,3 +605,159 @@ input:focus, select:focus { outline: none; }
 .settings-row:nth-child(1) { animation-delay: 0.05s; }
 .settings-row:nth-child(2) { animation-delay: 0.12s; }
 .settings-row:nth-child(3) { animation-delay: 0.19s; }
+
+/* ── Desktop Layout (≥1024px) ────────────── */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #080808;
+}
+.sidebar-nav {
+    display: none;
+}
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+.content-container {
+    width: 100%;
+    max-width: 700px;
+    padding: 0 20px;
+}
+@media (min-width: 1024px) {
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        width: 220px;
+        min-width: 220px;
+        min-height: 100vh;
+        background: #0E0E0E;
+        border-right: 2px solid #2A2A2A;
+        padding: 20px 12px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px 20px;
+        border-bottom: 2px solid #2A2A2A;
+        margin-bottom: 16px;
+    }
+    .sidebar-brand {
+        font-size: 18px;
+        font-weight: 900;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .sidebar-items {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+    }
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        background: none;
+        border: none;
+        color: #555;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: 'Urbanist', sans-serif;
+        transition: color 0.2s, background 0.2s;
+        text-align: left;
+    }
+    .sidebar-item:hover {
+        color: #aaa;
+        background: #1A1A1A;
+    }
+    .sidebar-item.active {
+        color: #fff;
+        background: #1A1A1A;
+        border-left: 3px solid #FF6B3D;
+    }
+    .sidebar-item.active .sidebar-icon { color: #FF6B3D; }
+    .sidebar-item:active { transform: scale(0.98); }
+    .sidebar-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        transition: color 0.2s;
+    }
+    .sidebar-item-add .sidebar-icon { color: #FF6B3D; }
+    .sidebar-item-add:hover .sidebar-icon { color: #fff; }
+    .sidebar-item-add.active .sidebar-icon { color: #fff; }
+    .sidebar-footer {
+        padding: 16px 12px 0;
+        border-top: 2px solid #2A2A2A;
+        margin-top: 16px;
+        text-align: center;
+    }
+
+    /* Hide mobile bottom nav on desktop */
+    .bottom-nav { display: none; }
+
+    /* Wider content area */
+    .content-container {
+        max-width: 860px;
+        padding: 24px 32px;
+    }
+
+    /* Multi-column meal layout on desktop */
+    #tab-home #dashboard-content .stagger-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    #tab-home .dark-card {
+        max-width: none;
+    }
+
+    /* Wider ring chart */
+    .ring-container {
+        width: 220px;
+        height: 220px;
+    }
+    .ring-center .pct { font-size: 64px; }
+
+    /* Larger metric cards on home */
+    .metric-card .m-value { font-size: 26px; }
+
+    /* Bigger modals on desktop */
+    #add-modal .animate-slide-up,
+    #reminders-modal .animate-slide-up {
+        max-width: 520px;
+        border-radius: 0;
+    }
+
+    /* Profile tab: wider layout */
+    #tab-profile .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+    /* Training: wider exercise grid */
+    #tab-training .grid.grid-cols-1 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #tab-training .grid.grid-cols-3 {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    /* Activity tab: wider charts */
+    #tab-progress .weekly-bar { height: 32px; }
+
+    /* Scrollbar thicker on desktop */
+    ::-webkit-scrollbar { width: 6px; }
+}
+@media (min-width: 1440px) {
+    .content-container { max-width: 1000px; }
+    .sidebar-nav { width: 250px; min-width: 250px; }
+}

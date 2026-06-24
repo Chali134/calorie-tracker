@@ -1,7 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-md mx-auto min-h-screen bg-[#080808] relative">
+<div class="app-layout">
+
+    <!-- Desktop Sidebar Navigation -->
+    <nav class="sidebar-nav">
+        <div class="sidebar-header">
+            <img src="/static/logo.svg" alt="CalTrack" class="w-9 h-9 border-2 border-[#D85A30] shrink-0">
+            <span class="sidebar-brand">CalTrack</span>
+        </div>
+        <div class="sidebar-items">
+            <button class="sidebar-item active" data-tab="home" onclick="switchTab('home', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-8 9 8"/><path d="M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10"/></svg>
+                <span>Home</span>
+            </button>
+            <button class="sidebar-item" data-tab="progress" onclick="switchTab('progress', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                <span>Activity</span>
+            </button>
+            <button class="sidebar-item sidebar-item-add" onclick="openAddModal()">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>
+                <span>Log Meal</span>
+            </button>
+            <button class="sidebar-item" data-tab="training" onclick="switchTab('training', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5L17.5 17.5M6.5 17.5L17.5 6.5"/><circle cx="6.5" cy="6.5" r="3.5"/><circle cx="17.5" cy="17.5" r="3.5"/><circle cx="6.5" cy="17.5" r="3.5"/><circle cx="17.5" cy="6.5" r="3.5"/></svg>
+                <span>Training</span>
+            </button>
+            <button class="sidebar-item" data-tab="profile" onclick="switchTab('profile', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a6 6 0 0112 0v1"/></svg>
+                <span>Profile</span>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <p class="text-[10px] text-gray-600">CalTrack &mdash; Free</p>
+        </div>
+    </nav>
+
+    <!-- Main content area -->
+    <div class="main-content">
+        <div class="content-container">
 
     <!-- Scrollable content area -->
     <div id="app-content" class="overflow-y-auto overflow-x-hidden" style="padding-bottom:90px;min-height:100vh">
@@ -214,6 +251,9 @@
             </div>
         </div>
     </div>
+
+</div>
+</div>
 
 <!-- Fixed Bottom Navigation -->
 <nav class="bottom-nav">
@@ -562,4 +602,5 @@ function loadNote(dateStr) {
     htmx.ajax('GET', '/note?d=' + dateStr, { target: '#note-content', swap: 'innerHTML' });
 }
 </script>
+</div>
 {% endblock %}
