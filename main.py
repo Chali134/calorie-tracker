@@ -97,7 +97,7 @@ async def meal_list(request: Request, d: str | None = None):
     total_fat = sum(m["fat"] for m in meals)
     return templates.TemplateResponse(
         request,
-        "partials/meal_list.html",
+        "partials/dashboard_content.html",
         {
             "request": request,
             "meals": meals,
@@ -148,7 +148,7 @@ async def add_meal(
     total_fat = sum(m["fat"] for m in meals)
     return templates.TemplateResponse(
         request,
-        "partials/meal_list.html",
+        "partials/dashboard_content.html",
         {
             "request": request,
             "meals": meals,
@@ -177,7 +177,7 @@ async def delete_meal(request: Request, meal_id: int):
     total_fat = sum(m["fat"] for m in meals)
     return templates.TemplateResponse(
         request,
-        "partials/meal_list.html",
+        "partials/dashboard_content.html",
         {
             "request": request,
             "meals": meals,
