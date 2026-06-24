@@ -606,6 +606,291 @@ input:focus, select:focus { outline: none; }
 .settings-row:nth-child(2) { animation-delay: 0.12s; }
 .settings-row:nth-child(3) { animation-delay: 0.19s; }
 
+/* ── Enhanced Progress Bar Animation ────────────── */
+.weekly-bar {
+    background: #FF6B3D;
+    opacity: 0.75;
+    transition: all 0.25s var(--ease-out-expo);
+    min-width: 16px;
+    position: relative;
+}
+.weekly-bar.today {
+    background: #2ECC71;
+    opacity: 0.9;
+    box-shadow: inset 0 -2px 0 rgba(46, 204, 113, 0.3);
+}
+.weekly-bar:hover {
+    opacity: 1;
+    transform: scaleY(1.05);
+}
+.weekly-bar::before {
+    content: attr(data-value);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: #1A1A1A;
+    border: 2px solid #2A2A2A;
+    color: #FF6B3D;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    margin-bottom: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.weekly-bar:hover::before {
+    opacity: 1;
+}
+
+.weekly-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B6B6B;
+    transition: all 0.25s var(--ease-out-expo);
+}
+.weekly-label.today {
+    color: #2ECC71;
+    font-weight: 700;
+}
+.weekly-label:hover {
+    color: #fff;
+}
+
+/* ── 7 Days Progress Card Enhancement ────────────── */
+.dark-card {
+    background: #1A1A1A;
+    border: 2px solid #2A2A2A;
+    transition: all 0.3s var(--ease-out-expo);
+}
+.dark-card:hover {
+    border-color: #3A3A3A;
+}
+
+/* ── Metric Card Enhancements ────────────── */
+.metric-card {
+    background: #1A1A1A;
+    border: 2px solid #2A2A2A;
+    padding: 12px;
+    border-radius: 0;
+    text-align: center;
+    transition: all 0.25s var(--ease-out-expo);
+}
+.metric-card:hover {
+    border-color: #FF6B3D;
+    background: #1A1A1A;
+}
+.metric-card:hover .m-value {
+    color: #FF6B3D;
+}
+.metric-card:active {
+    transform: scale(0.98);
+}
+.m-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+.m-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    transition: color 0.2s;
+    tabular-nums: auto;
+}
+.m-sub {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+}
+.m-sub.orange {
+    color: #FF6B3D;
+}
+
+/* ── Ring Container Enhancements ────────────── */
+.ring-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: slideUp 0.5s var(--ease-out-expo);
+}
+.ring-container svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+.ring-bg {
+    stroke: #2A2A2A;
+    stroke-width: 8;
+}
+.ring-fill {
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 8px rgba(255, 107, 61, 0.2));
+    transition: stroke-dashoffset 0.8s var(--ease-out-expo);
+}
+.ring-center {
+    position: absolute;
+    text-align: center;
+}
+.ring-center .pct {
+    display: block;
+    font-size: 48px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+.ring-center .label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.ring-center .badge {
+    display: block;
+    font-size: 10px;
+    color: #FF6B3D;
+    margin-top: 4px;
+    font-weight: 700;
+}
+
+/* ── Meal Row Enhancements ────────────── */
+.meal-row {
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out-expo);
+    animation: slideUp 0.35s var(--ease-out-expo) both;
+}
+.meal-row:hover {
+    border-color: #FF6B3D;
+    background: #1F1F1F;
+}
+.meal-row:active {
+    transform: scale(0.98);
+}
+.chevron {
+    transition: transform 0.3s var(--ease-spring);
+}
+
+/* ── Stagger animations for meal items ────────────── */
+.stagger-enter {
+    display: contents;
+}
+.stagger-enter .meal-row:nth-child(1) { animation-delay: 0.08s; }
+.stagger-enter .meal-row:nth-child(2) { animation-delay: 0.16s; }
+.stagger-enter .meal-row:nth-child(3) { animation-delay: 0.24s; }
+.stagger-enter .meal-row:nth-child(4) { animation-delay: 0.32s; }
+
+/* ── Tab transitions ────────────── */
+.tab-content {
+    animation: slideUp 0.35s var(--ease-out-expo);
+}
+
+/* ── Input transitions ────────────── */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+    transition: all 0.2s;
+}
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #FF6B3D;
+    outline: none;
+}
+
+/* ── Button transitions ────────────── */
+button {
+    transition: all 0.2s var(--ease-out-expo);
+}
+button:active {
+    transform: scale(0.97);
+}
+
+/* ── Mobile Layout Optimizations ────────────── */
+@media (max-width: 1023px) {
+    /* Reduce padding on mobile */
+    .px-4 { padding-left: 12px; padding-right: 12px; }
+    
+    /* Better card spacing */
+    .dark-card {
+        border-width: 1.5px;
+        margin-bottom: 1px;
+    }
+    
+    /* Improved tab content padding */
+    .tab-content {
+        padding: 0;
+    }
+    
+    /* Better typography hierarchy */
+    h1 { font-size: 24px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+    
+    /* Ring chart optimization for mobile */
+    .ring-container {
+        width: 180px;
+        height: 180px;
+    }
+    .ring-container svg {
+        width: 180px;
+        height: 180px;
+    }
+    .ring-center .pct {
+        font-size: 40px;
+    }
+    .ring-center .label {
+        font-size: 10px;
+    }
+    .ring-center .badge {
+        font-size: 9px;
+    }
+    
+    /* Metric cards more compact */
+    .metric-card {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+    .metric-card .m-value {
+        font-size: 18px;
+    }
+    .metric-card .m-label {
+        font-size: 9px;
+    }
+    
+    /* Better bottom nav spacing */
+    .bottom-nav {
+        bottom: 8px;
+        width: 92%;
+    }
+    
+    /* Weekly bars less gap on mobile */
+    .flex.items-end.justify-between {
+        gap: 6px;
+    }
+    
+    /* Modal better for small screens */
+    #add-modal,
+    #reminders-modal {
+        max-width: calc(100vw - 24px);
+    }
+    
+    /* Smooth scroll on mobile */
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
 /* ── Desktop Layout (≥1024px) ────────────── */
 .app-layout {
     display: flex;
@@ -756,6 +1041,61 @@ input:focus, select:focus { outline: none; }
 
     /* Scrollbar thicker on desktop */
     ::-webkit-scrollbar { width: 6px; }
+    
+    /* Enhanced desktop interactions */
+    .metric-card {
+        padding: 14px;
+    }
+    .metric-card:hover {
+        border-color: #FF6B3D;
+        transform: translateY(-2px);
+    }
+    
+    .dark-card {
+        border-width: 2px;
+    }
+    .dark-card:hover {
+        border-color: #FF6B3D;
+    }
+    
+    .meal-row {
+        margin-bottom: 2px;
+    }
+    .meal-row:hover {
+        background: #1F1F1F;
+        border-color: #FF6B3D;
+    }
+    
+    /* Better spacing on desktop */
+    .px-4 { padding-left: 0; padding-right: 0; }
+    .content-container {
+        padding: 24px 32px;
+    }
+    
+    /* Enhanced ring for desktop */
+    .ring-container svg {
+        filter: drop-shadow(0 4px 12px rgba(255, 107, 61, 0.15));
+    }
+    .ring-fill {
+        filter: drop-shadow(0 0 12px rgba(255, 107, 61, 0.25));
+    }
+    
+    /* Better input styling on desktop */
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+        padding: 10px 12px;
+    }
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #FF6B3D;
+        box-shadow: inset 0 0 0 1px #FF6B3D;
+    }
 }
 @media (min-width: 1440px) {
     .content-container { max-width: 1000px; }

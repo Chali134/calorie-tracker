@@ -41,7 +41,7 @@
 
 <div class="px-4 pb-2">
     <div class="dark-card p-3.5">
-        <p class="text-[13px] font-bold text-white mb-2.5">7 Days Progress</p>
+        <p class="text-[13px] font-bold text-white mb-3">7 Days Progress</p>
         <div class="flex items-end justify-between gap-1.5">
             {% for i in range(7) %}
             {% set day_cal = week_data[i] if week_data and i < week_data|length else 0 %}
@@ -50,11 +50,23 @@
             {% if bar_h > 60 %}{% set bar_h = 60 %}{% endif %}
             {% set is_today = (i == 6) %}
             {% set days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
-            <div class="flex flex-col items-center gap-1 flex-1">
-                <div class="weekly-bar {% if is_today %}today{% endif %}" style="height:{{ bar_h }}px"></div>
+            <div class="flex flex-col items-center gap-1 flex-1 group">
+                <div class="weekly-bar {% if is_today %}today{% endif %}" 
+                     style="height:{{ bar_h }}px"
+                     data-value="{{ "%.0f"|format(day_cal) }} kcal"
+                     title="{{ days[i] }}: {{ "%.0f"|format(day_cal) }} kcal"></div>
                 <span class="weekly-label {% if is_today %}today{% endif %}">{{ days[i] }}</span>
+                {% if is_today %}<span class="text-[9px] font-bold text-[#2ECC71] uppercase tracking-wider">today</span>{% endif %}
             </div>
             {% endfor %}
+        </div>
+        <div class="mt-3 pt-3 border-t border-[#2A2A2A] flex justify-between text-xs">
+            <div>
+                <span class="text-gray-500">Avg: </span><span class="font-bold text-white">{{ "%.0f"|format(week_data | sum / 7) }} kcal</span>
+            </div>
+            <div>
+                <span class="text-gray-500">Total: </span><span class="font-bold text-white">{{ "%.0f"|format(week_data | sum) }} kcal</span>
+            </div>
         </div>
     </div>
 </div>
