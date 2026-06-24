@@ -1,0 +1,12 @@
+{% if results %}
+<div class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 z-50 max-h-56 overflow-y-auto" id="food-results">
+    {% for food in results %}
+    <button type="button"
+        onclick="selectFood('{{ food.name|replace("'", "\\'") }}', {{ food.calories }}, {{ food.protein }}, {{ food.carbs }}, {{ food.fat }})"
+        class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors">
+        <span class="font-medium text-gray-900">{{ food.name }}</span>
+        <span class="text-sm text-gray-400">{{ "%.0f"|format(food.calories) }} kcal</span>
+    </button>
+    {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-lg mx-auto px-5 pt-7 pb-24 min-h-screen flex flex-col">
+    <!-- Dashboard (updates on add/delete) -->
+    <div id="dashboard-content">
+        {% include "partials/dashboard_content.html" %}
+    </div>
+
+    <!-- Add FAB -->
+    <button
+        onclick="document.getElementById('add-modal').classList.remove('hidden')"
+        class="fixed bottom-8 right-6 w-14 h-14 bg-warm-900 hover:bg-warm-800 text-cream rounded-full shadow-lg shadow-warm-900/20 flex items-center justify-center text-2xl active:scale-90 transition-all duration-200"
+    >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+    </button>
+
+    <!-- Add Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center">
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-white rounded-t-3xl w-full max-w-lg p-6 pb-10 animate-slide-up">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-lg font-semibold text-warm-900">Add Meal</h2>
+                <button onclick="closeModal()" class="text-warm-300 hover:text-warm-500 transition-colors p-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Search — standalone, outside form -->
+            <div class="relative mb-4">
+                <label class="block text-sm font-medium text-warm-600 mb-1.5">Food</label>
+                <input type="text" id="food-search" placeholder="Search or type a food..."
+                    autocomplete="off"
+                    class="w-full px-4 py-3 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors placeholder:text-warm-300">
+                <div id="food-results-container" class="relative"></div>
+            </div>
+
+            <form
+                hx-post="/meals"
+                hx-target="#dashboard-content"
+                hx-swap="innerHTML"
+                hx-on::after-request="onMealAdded(this)"
+                class="space-y-4"
+            >
+                <input type="hidden" name="name" id="f-name">
+
+                <!-- Meal Type -->
+                <div>
+                    <label class="block text-sm font-medium text-warm-600 mb-1.5">Meal</label>
+                    <div class="grid grid-cols-4 gap-2" id="meal-type-select">
+                        {% for mt in [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snack")] %}
+                        <label class="meal-type-label flex items-center justify-center px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 transition-colors cursor-pointer text-sm font-medium {% if mt[0] == 'snack' %}active{% endif %}">
+                            <input type="radio" name="meal_type" value="{{ mt[0] }}" {% if mt[0] == 'snack' %}checked{% endif %} class="hidden" onchange="this.closest('.meal-type-label').parentElement.querySelectorAll('.meal-type-label').forEach(l => l.classList.remove('active')); this.closest('.meal-type-label').classList.add('active')">
+                            {{ mt[1] }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Macros row -->
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 mb-1">Calories</label>
+                        <input type="number" name="calories" id="f-calories" step="0.1" min="0" required
+                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 mb-1">Protein</label>
+                        <input type="number" name="protein" id="f-protein" step="0.1" min="0" value="0"
+                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 mb-1">Carbs</label>
+                        <input type="number" name="carbs" id="f-carbs" step="0.1" min="0" value="0"
+                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 mb-1">Fat</label>
+                    <input type="number" name="fat" id="f-fat" step="0.1" min="0" value="0"
+                        class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3.5 bg-warm-900 hover:bg-warm-800 text-cream rounded-xl font-medium active:scale-[0.98] transition-all duration-200 mt-2">
+                    Log Meal
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let searchTimeout;
+
+document.getElementById('food-search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const q = this.value.trim();
+    if (!q) { document.getElementById('food-results-container').innerHTML = ''; return; }
+    searchTimeout = setTimeout(() => {
+        htmx.ajax('GET', '/foods/search', {
+            values: { q: q },
+            target: '#food-results-container',
+            swap: 'innerHTML'
+        });
+    }, 300);
+});
+
+function selectFood(name, cal, pro, carbs, fat) {
+    document.getElementById('food-search').value = name;
+    document.getElementById('f-name').value = name;
+    document.getElementById('f-calories').value = cal;
+    document.getElementById('f-protein').value = pro;
+    document.getElementById('f-carbs').value = carbs;
+    document.getElementById('f-fat').value = fat;
+    document.getElementById('food-results-container').innerHTML = '';
+}
+
+function closeModal() {
+    document.getElementById('add-modal').classList.add('hidden');
+}
+
+function onMealAdded(form) {
+    form.reset();
+    document.getElementById('food-search').value = '';
+    closeModal();
+    document.getElementById('food-results-container').innerHTML = '';
+}
+</script>
+{% endblock %}
