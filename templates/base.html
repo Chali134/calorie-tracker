@@ -5,22 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Calorie Tracker">
+    <meta name="apple-mobile-web-app-title" content="Calories">
     <link rel="manifest" href="/static/manifest.json">
     <link rel="apple-touch-icon" href="/static/icon.png">
     <script src="https://unpkg.com/htmx.org@2.0.0"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap">
     <link rel="stylesheet" href="/static/css/style.css">
-    <title>{% block title %}Calorie Tracker{% endblock %}</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+    <title>{% block title %}Calories{% endblock %}</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: '#faf9f7',
+                        warm: {
+                            50: '#faf8f6',
+                            100: '#f0ede8',
+                            200: '#e0dad2',
+                            300: '#c5bbb0',
+                            400: '#a69688',
+                            500: '#8b7a6b',
+                            600: '#716257',
+                            700: '#5d5047',
+                            800: '#4f443d',
+                            900: '#453b35',
+                        }
+                    }
+                }
+            }
         }
-    </style>
+    </script>
 </head>
-<body class="min-h-screen bg-[#f8f9fa] text-gray-900">
+<body class="min-h-screen bg-cream text-warm-900 font-sans antialiased">
     {% block content %}{% endblock %}
 </body>
 </html>

@@ -1,13 +1,13 @@
-<!-- Macro bar at top (updates with HTMX) -->
-<div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+<!-- Macro bar -->
+{% set pct = (total_calories / goals.calorie_target * 100) | round %}
+{% if pct > 100 %}{% set pct = 100 %}{% endif %}
+<div class="bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-warm-200/50 mb-4">
     <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium text-gray-700">Calories</span>
-        <span class="text-sm text-gray-500">{{ "%.0f"|format(total_calories) }} / {{ "%.0f"|format(goals.calorie_target) }}</span>
+        <span class="text-sm font-medium text-warm-700">Daily progress</span>
+        <span class="text-sm tabular-nums text-warm-400">{{ "%.0f"|format(total_calories) }} / {{ "%.0f"|format(goals.calorie_target) }}</span>
     </div>
-    <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-        {% set pct = (total_calories / goals.calorie_target * 100) | round %}
-        {% if pct > 100 %}{% set pct = 100 %}{% endif %}
-        <div class="h-full bg-green-500 rounded-full transition-all duration-500" style="width: {{ pct }}%"></div>
+    <div class="h-1.5 bg-warm-200/50 rounded-full overflow-hidden">
+        <div class="h-full bg-warm-900 rounded-full transition-all duration-500" style="width: {{ pct }}%"></div>
     </div>
 </div>
 
@@ -15,21 +15,21 @@
 <div class="space-y-2">
     {% if meals %}
         {% for meal in meals %}
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium
-                {% if meal.meal_type == 'breakfast' %}bg-orange-100 text-orange-600
-                {% elif meal.meal_type == 'lunch' %}bg-blue-100 text-blue-600
-                {% elif meal.meal_type == 'dinner' %}bg-purple-100 text-purple-600
-                {% else %}bg-gray-100 text-gray-600{% endif %}">
+        <div class="meal-enter bg-white rounded-2xl px-4 py-3.5 border border-warm-200/50 flex items-center gap-3.5">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-semibold shrink-0
+                {% if meal.meal_type == 'breakfast' %}bg-orange-100 text-orange-700
+                {% elif meal.meal_type == 'lunch' %}bg-sky-100 text-sky-700
+                {% elif meal.meal_type == 'dinner' %}bg-violet-100 text-violet-700
+                {% else %}bg-warm-100 text-warm-600{% endif %}">
                 {{ meal.name[:2].upper() }}
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
-                    <h3 class="font-medium text-gray-900 truncate">{{ meal.name }}</h3>
-                    <span class="text-sm font-semibold text-gray-900">{{ "%.0f"|format(meal.calories) }}</span>
+                    <h3 class="font-medium text-warm-900 truncate text-[15px]">{{ meal.name }}</h3>
+                    <span class="text-sm font-semibold text-warm-900 tabular-nums ml-2">{{ "%.0f"|format(meal.calories) }}</span>
                 </div>
-                <div class="flex items-center gap-3 text-xs text-gray-400 mt-0.5">
-                    <span class="capitalize">{{ meal.meal_type }}</span>
+                <div class="flex items-center gap-2.5 text-[11px] text-warm-400 mt-1">
+                    <span class="capitalize bg-warm-50 px-2 py-0.5 rounded-md font-medium">{{ meal.meal_type }}</span>
                     {% if meal.protein > 0 %}<span>P {{ "%.0f"|format(meal.protein) }}g</span>{% endif %}
                     {% if meal.carbs > 0 %}<span>C {{ "%.0f"|format(meal.carbs) }}g</span>{% endif %}
                     {% if meal.fat > 0 %}<span>F {{ "%.0f"|format(meal.fat) }}g</span>{% endif %}
@@ -39,18 +39,23 @@
                 hx-delete="/meals/{{ meal.id }}"
                 hx-target="#meal-list"
                 hx-swap="innerHTML"
-                class="text-gray-300 hover:text-red-400 transition-colors p-1"
+                class="text-warm-300 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-50 shrink-0"
             >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                     <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
                 </svg>
             </button>
         </div>
         {% endfor %}
     {% else %}
-        <div class="text-center py-12 text-gray-400">
-            <p class="text-lg mb-1">No meals logged yet</p>
-            <p class="text-sm">Tap + to add your first meal</p>
+        <div class="text-center py-16">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-warm-100 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c5bbb0" stroke-width="1.5" stroke-linecap="round">
+                    <path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/>
+                </svg>
+            </div>
+            <p class="text-warm-400 font-medium">No meals yet</p>
+            <p class="text-sm text-warm-300 mt-1">Tap + to log your first meal</p>
         </div>
     {% endif %}
 </div>

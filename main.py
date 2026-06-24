@@ -6,10 +6,11 @@ from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 from datetime import date
 
-from database import init_db, get_db
+from database import init_db, get_db, search_foods
 from models import MealCreate, Goals
 
 BASE_DIR = Path(__file__).parent
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -74,6 +75,16 @@ async def index(request: Request, d: str | None = None):
     )
 
 
+@app.get("/foods/search", response_class=HTMLResponse)
+async def food_search(request: Request, q: str = ""):
+    results = await search_foods(q) if q else []
+    return templates.TemplateResponse(
+        request,
+        "partials/food_results.html",
+        {"request": request, "results": results},
+    )
+
+
 @app.get("/meals", response_class=HTMLResponse)
 async def meal_list(request: Request, d: str | None = None):
     if d is None:
@@ -113,7 +124,15 @@ async def add_meal(
 ):
     if d is None:
         d = date.today().isoformat()
-    meal = MealCreate(name=name, calories=calories, protein=protein, carbs=carbs, fat=fat, meal_type=meal_type, date=d)
+    meal = MealCreate(
+        name=name,
+        calories=calories,
+        protein=protein,
+        carbs=carbs,
+        fat=fat,
+        meal_type=meal_type,
+        date=d,
+    )
     db = await get_db()
     await db.execute(
         "INSERT INTO meals (name, calories, protein, carbs, fat, meal_type, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
