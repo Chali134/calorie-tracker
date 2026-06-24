@@ -244,7 +244,7 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 .bottom-nav {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
     width: 88%;
     max-width: 360px;
     position: fixed;
@@ -254,7 +254,7 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     margin: 0 auto;
     background: #111;
     border: 2px solid #2A2A2A;
-    padding: 6px 8px;
+    padding: 4px 6px;
     min-height: 52px;
     animation: fadeInUp 0.5s var(--ease-out-expo) 0.2s both;
 }
