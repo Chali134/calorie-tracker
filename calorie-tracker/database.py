@@ -1,5 +1,5 @@
 import secrets
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import aiosqlite
 from passlib.hash import bcrypt
 
@@ -831,3 +831,55 @@ async def save_note(user_id: int, target_date: str, content: str):
     )
     await db.commit()
     await db.close()
+
+
+# ── Week data for a specific date ────────────────────────
+async def get_week_data_for_date(user_id: int, target_date: str) -> list[float]:
+    """Get 7-day calorie intake data for the week containing target_date (Mon-Sun)"""
+    target = datetime.fromisoformat(target_date).date()
+    # Find the Monday of this week
+    days_since_monday = target.weekday()
+    monday = target - timedelta(days=days_since_monday)
+    
+    db = await get_db()
+    week = []
+    for i in range(7):
+        d = (monday + timedelta(days=i)).isoformat()
+        rows = await db.execute_fetchall(
+            "SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date = ?",
+            (user_id, d),
+        )
+        week.append(rows[0]["total"] or 0)
+    await db.close()
+    return week
+
+
+async def get_workout_week_data_for_date(user_id: int, target_date: str) -> list[dict]:
+    """Get 7-day workout data for the week containing target_date (Mon-Sun)"""
+    target = datetime.fromisoformat(target_date).date()
+    # Find the Monday of this week
+    days_since_monday = target.weekday()
+    monday = target - timedelta(days=days_since_monday)
+    
+    db = await get_db()
+    week = []
+    for i in range(7):
+        d = (monday + timedelta(days=i)).isoformat()
+        rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as count, COALESCE(SUM(completed), 0) as completed FROM workouts WHERE user_id = ? AND date = ?",
+            (user_id, d),
+        )
+        cal_rows = await db.execute_fetchall(
+            """SELECT COALESCE(SUM(e.calories_per_hour * 1.0 / 30 * w.sets), 0) as cals
+               FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+               WHERE w.user_id = ? AND w.date = ? AND w.completed = 1""",
+            (user_id, d),
+        )
+        week.append({
+            "date": d,
+            "count": rows[0]["count"],
+            "completed": rows[0]["completed"],
+            "calories": int(cal_rows[0]["cals"]) if cal_rows else 0,
+        })
+    await db.close()
+    return week

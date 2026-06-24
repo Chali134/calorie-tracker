@@ -21,6 +21,7 @@ from database import (
     get_exercises, get_muscle_groups, get_exercise_by_id,
     log_workout, get_today_workouts, delete_workout,
     complete_workout, get_calories_burned_today, get_calories_burned_by_date, get_workout_week_data,
+    get_week_data_for_date, get_workout_week_data_for_date,
     get_total_volume_today, get_workout_stats, get_month_heatmap, get_net_calories_today,
     get_heatmap_grid,
     get_note, save_note,
@@ -741,9 +742,30 @@ async def day_detail(request: Request, date: str):
             "goals": goals,
             "total_calories": total_cal,
             "total_protein": total_pro,
-            "total_carbs": total_carb,
-            "total_fat": total_fat,
-            "calories_burned": round(calories_burned),
+             "total_carbs": total_carb,
+             "total_fat": total_fat,
+             "calories_burned": round(calories_burned),
+         },
+     )
+
+
+@app.get("/activity-charts/{date_str}", response_class=HTMLResponse)
+async def activity_charts(request: Request, date_str: str):
+    """Return the activity charts for the week containing date_str"""
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    goals = await get_goals_typed(user["id"])
+    week_data = await get_week_data_for_date(user["id"], date_str)
+    workout_week = await get_workout_week_data_for_date(user["id"], date_str)
+    return templates.TemplateResponse(
+        request,
+        "partials/activity_charts.html",
+        {
+            "request": request,
+            "goals": goals,
+            "week_data": week_data,
+            "workout_week": workout_week,
         },
     )
 

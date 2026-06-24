@@ -1,0 +1,69 @@
+<!-- SVG weekly charts - extracted from activity_content.html -->
+<div class="dark-card p-3.5 mb-3">
+    <p class="text-sm font-bold text-white mb-2.5">Calorie Intake</p>
+    {% set weekdays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+    {% set goal_line = goals.calorie_target %}
+    <div class="relative" style="height:140px">
+        <svg width="100%" height="140" viewBox="0 0 280 120" style="overflow:visible">
+            <!-- Goal line -->
+            <line x1="0" y1="33" x2="270" y2="33" stroke="#FF6B3D" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+            <text x="244" y="30" fill="#FF6B3D" font-size="8" font-weight="700" font-family="sans-serif" opacity="0.7">goal</text>
+            {% for i in range(7) %}
+            {% set day_cal = week_data[i] if week_data and i < week_data|length else 0 %}
+            {% set pct = (day_cal / goal_line) if goal_line > 0 else 0 %}
+            {% set bar_h_px = (pct * 68)|round %}
+            {% if bar_h_px > 68 %}{% set bar_h_px = 68 %}{% endif %}
+            {% if bar_h_px < 3 and day_cal > 0 %}{% set bar_h_px = 3 %}{% endif %}
+            {% set x = 12 + i * 37 %}
+            {% set bar_top = 32 + (68 - bar_h_px) %}
+            {% set is_today = (i == 6) %}
+            <rect x="{{ x }}" y="{{ bar_top }}" width="24" height="{{ bar_h_px }}"
+                class="chart-bar"
+                fill="{% if is_today %}#2ECC71{% else %}#FF6B3D{% endif %}"
+                opacity="0.85">
+            </rect>
+            <!-- Value label -->
+            <text x="{{ x + 12 }}" y="{{ bar_top - 5 }}" text-anchor="middle"
+                fill="{% if is_today %}#2ECC71{% else %}#FF6B3D{% endif %}"
+                font-size="9" font-weight="700" font-family="sans-serif">{{ "%.0f"|format(day_cal) }}</text>
+            <!-- Day label -->
+            <text x="{{ x + 12 }}" y="117" text-anchor="middle"
+                fill="{% if is_today %}#2ECC71{% else %}#6B6B6B{% endif %}"
+                font-size="9" font-weight="{% if is_today %}700{% else %}500{% endif %}" font-family="sans-serif">{{ weekdays[i] }}</text>
+            {% endfor %}
+        </svg>
+    </div>
+</div>
+
+<!-- Burned calories chart -->
+<div class="dark-card p-3.5 mb-3">
+    <p class="text-sm font-bold text-white mb-2.5">Calories Burned</p>
+    {% set max_burn = workout_week | map(attribute="calories") | max %}
+    {% if max_burn == 0 %}{% set max_burn = 1 %}{% endif %}
+    <div class="relative" style="height:120px">
+        <svg width="100%" height="120" viewBox="0 0 280 100" style="overflow:visible">
+            {% for i in range(7) %}
+            {% set day_burn = workout_week[i]["calories"] if workout_week and i < workout_week|length else 0 %}
+            {% set burn_pct = (day_burn / max_burn) if max_burn > 0 else 0 %}
+            {% set bar_h_px = (burn_pct * 55)|round %}
+            {% if bar_h_px < 3 and day_burn > 0 %}{% set bar_h_px = 3 %}{% endif %}
+            {% set x = 12 + i * 37 %}
+            {% set bar_top = 20 + (55 - bar_h_px) %}
+            {% set is_today = (i == 6) %}
+            <rect x="{{ x }}" y="{{ bar_top }}" width="24" height="{{ bar_h_px }}"
+                class="chart-bar"
+                fill="#2ECC71"
+                opacity="0.7">
+            </rect>
+            <!-- Value -->
+            <text x="{{ x + 12 }}" y="{{ bar_top - 5 }}" text-anchor="middle"
+                fill="#2ECC71"
+                font-size="9" font-weight="700" font-family="sans-serif">{{ "%.0f"|format(day_burn) }}</text>
+            <!-- Day -->
+            <text x="{{ x + 12 }}" y="96" text-anchor="middle"
+                fill="{% if is_today %}#2ECC71{% else %}#6B6B6B{% endif %}"
+                font-size="9" font-weight="{% if is_today %}700{% else %}500{% endif %}" font-family="sans-serif">{{ weekdays[i] }}</text>
+            {% endfor %}
+        </svg>
+    </div>
+</div>
