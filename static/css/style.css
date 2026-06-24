@@ -1,0 +1,53 @@
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth circle animation */
+.progress-ring {
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+/* Slide up modal */
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+/* Modal backdrop */
+#add-modal {
+    transition: opacity 0.2s ease;
+}
+
+#add-modal.hidden {
+    display: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 0;
+}
+
+/* Input focus */
+input:focus, select:focus {
+    outline: none;
+}
+
+/* Safe area for iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
