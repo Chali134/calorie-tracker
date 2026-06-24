@@ -466,7 +466,10 @@ async def add_meal(
         return RedirectResponse("/login", status_code=302)
     if d is None:
         d = date.today().isoformat()
-    meal = MealCreate(name=name, calories=calories, protein=protein, carbs=carbs, fat=fat, meal_type=meal_type, servings=servings, date=d)
+    try:
+        meal = MealCreate(name=name, calories=calories, protein=protein, carbs=carbs, fat=fat, meal_type=meal_type, servings=servings, date=d)
+    except Exception as e:
+        return HTMLResponse(f'<div class="px-5 py-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 mb-3">Invalid: {e}</div>', status_code=400)
     db = await get_db()
     await db.execute(
         "INSERT INTO meals (user_id, name, calories, protein, carbs, fat, meal_type, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",

@@ -341,7 +341,7 @@ setTimeout(checkReminders, 2000);
             <input type="text" id="food-search" placeholder="Search or type a food..."
                 autocomplete="off"
                 class="w-full px-3.5 py-2.5 dark-card  text-sm placeholder:text-gray-500 focus:outline-none focus:border-[#FF6B3D] transition-colors"
-                oninput="searchFoods(this.value); document.getElementById('f-name').value = this.value">
+                oninput="document.getElementById('f-name').value = this.value">
             <div id="food-results-container" class="relative"></div>
         </div>
 

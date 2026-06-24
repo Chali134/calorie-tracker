@@ -4,7 +4,7 @@ from datetime import date
 
 class MealCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
-    calories: float = Field(..., gt=0, le=10000)
+    calories: float = Field(..., ge=0, le=10000)
     protein: float = Field(default=0, ge=0, le=1000)
     carbs: float = Field(default=0, ge=0, le=1000)
     fat: float = Field(default=0, ge=0, le=1000)
