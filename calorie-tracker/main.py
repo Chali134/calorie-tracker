@@ -18,6 +18,12 @@ from database import (
     get_favourite_foods, is_favourite,
     get_recent_foods,
     get_reminders, save_reminder,
+    get_exercises, get_muscle_groups, get_exercise_by_id,
+    log_workout, get_today_workouts, delete_workout,
+    complete_workout, get_calories_burned_today, get_calories_burned_by_date, get_workout_week_data,
+    get_total_volume_today, get_workout_stats, get_month_heatmap, get_net_calories_today,
+    get_heatmap_grid,
+    get_note, save_note,
 )
 from models import MealCreate, Goals
 from tdee import calculate_targets
@@ -280,6 +286,16 @@ async def index(request: Request, d: str | None = None):
         else:
             bmi_label = "Obese"
             bmi_desc = "Consult a professional"
+    calories_burned = await get_calories_burned_today(user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    workout_week = await get_workout_week_data(user["id"])
+    muscle_groups = await get_muscle_groups()
+    all_exercises = await get_exercises()
+    total_volume = await get_total_volume_today(user["id"])
+    workout_stats = await get_workout_stats(user["id"])
+    heatmap_grid = await get_heatmap_grid(user["id"])
+    net_cals = await get_net_calories_today(user["id"])
+    today_iso = date.today().isoformat()
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -294,6 +310,7 @@ async def index(request: Request, d: str | None = None):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "today_iso": today_iso,
             "recent_foods": recent,
             "favourite_foods": favourites,
             "avg_calories": round(avg_calories),
@@ -303,6 +320,17 @@ async def index(request: Request, d: str | None = None):
             "bmi_label": bmi_label,
             "bmi_desc": bmi_desc,
             "reminders": reminders,
+            "calories_burned": round(calories_burned),
+            "today_workouts": today_workouts,
+            "workouts": today_workouts,
+            "workout_week": workout_week,
+            "muscle_groups": muscle_groups,
+            "all_exercises": all_exercises,
+            "total_volume": round(total_volume),
+            "workout_stats": workout_stats,
+            "heatmap_grid": heatmap_grid,
+            "net_eaten": round(net_cals["eaten"]),
+            "net_burned": round(net_cals["burned"]),
         },
     )
 
@@ -337,6 +365,7 @@ async def meal_list(request: Request, d: str | None = None):
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_today(user["id"])
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -350,6 +379,72 @@ async def meal_list(request: Request, d: str | None = None):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
+        },
+    )
+
+
+@app.get("/activity", response_class=HTMLResponse)
+async def activity_tab(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    profile = await get_profile(user["id"])
+    goals = await get_goals_typed(user["id"])
+    avg_calories = await get_avg_calories(user["id"])
+    streak = await get_streak(user["id"])
+    week_data = await get_week_data(user["id"])
+    bmi_val = 0
+    bmi_label = ""
+    bmi_desc = ""
+    if profile:
+        h_m = profile["height"] / 100
+        bmi_val = round(profile["weight"] / (h_m * h_m), 1)
+        if bmi_val < 18.5:
+            bmi_label = "Underweight"
+            bmi_desc = "Consider gaining weight"
+        elif bmi_val < 25:
+            bmi_label = "Normal"
+            bmi_desc = "Healthy range"
+        elif bmi_val < 30:
+            bmi_label = "Overweight"
+            bmi_desc = "Consider losing weight"
+        else:
+            bmi_label = "Obese"
+            bmi_desc = "Consult a professional"
+    today_iso = date.today().isoformat()
+    meals = await get_today_meals(user["id"], today_iso)
+    total_cal = sum(m["calories"] for m in meals)
+    total_pro = sum(m["protein"] for m in meals)
+    total_carb = sum(m["carbs"] for m in meals)
+    total_fat = sum(m["fat"] for m in meals)
+    workouts = await get_today_workouts(user["id"], for_date=today_iso)
+    calories_burned = await get_calories_burned_by_date(user["id"], today_iso)
+    workout_week = await get_workout_week_data(user["id"])
+    return templates.TemplateResponse(
+        request,
+        "partials/activity_content.html",
+        {
+            "request": request,
+            "user": user,
+            "profile": profile,
+            "goals": goals,
+            "avg_calories": round(avg_calories),
+            "streak": streak,
+            "week_data": week_data,
+            "workout_week": workout_week,
+            "bmi": bmi_val,
+            "bmi_label": bmi_label,
+            "bmi_desc": bmi_desc,
+            "today_iso": today_iso,
+            "selected_date": today_iso,
+            "meals": meals,
+            "workouts": workouts,
+            "total_calories": total_cal,
+            "total_protein": total_pro,
+            "total_carbs": total_carb,
+            "total_fat": total_fat,
+            "calories_burned": round(calories_burned),
         },
     )
 
@@ -385,6 +480,7 @@ async def add_meal(
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_today(user["id"])
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -398,6 +494,7 @@ async def add_meal(
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
         },
     )
 
@@ -421,6 +518,7 @@ async def delete_meal(request: Request, meal_id: int):
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_today(user["id"])
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -434,6 +532,7 @@ async def delete_meal(request: Request, meal_id: int):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
         },
     )
 
@@ -495,6 +594,169 @@ async def update_reminder(
     return templates.TemplateResponse(
         request, "partials/reminders_list.html",
         {"request": request, "reminders": reminders},
+    )
+
+
+# ── Training / Workout routes ────────────────────────────
+
+@app.get("/training", response_class=HTMLResponse)
+async def training_content(request: Request, muscle: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    muscle_groups = await get_muscle_groups()
+    all_exercises = await get_exercises(muscle)
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_today(user["id"])
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": all_exercises,
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": muscle,
+        },
+    )
+
+
+@app.post("/workouts")
+async def add_workout(
+    request: Request,
+    exercise_id: int = Form(...),
+    sets: int = Form(3),
+    reps: int = Form(10),
+    weight_kg: float = Form(0),
+):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    await log_workout(user["id"], exercise_id, sets, reps, weight_kg)
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_today(user["id"])
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    )
+
+
+@app.delete("/workouts/{workout_id}")
+async def remove_workout(request: Request, workout_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    await delete_workout(workout_id, user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_today(user["id"])
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    )
+
+
+@app.post("/workouts/{workout_id}/complete")
+async def toggle_workout_complete(request: Request, workout_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    await complete_workout(workout_id, user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_today(user["id"])
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    ) 
+
+
+@app.get("/day/{date}", response_class=HTMLResponse)
+async def day_detail(request: Request, date: str):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    meals = await get_today_meals(user["id"], date)
+    goals = await get_goals_typed(user["id"])
+    total_cal = sum(m["calories"] for m in meals)
+    total_pro = sum(m["protein"] for m in meals)
+    total_carb = sum(m["carbs"] for m in meals)
+    total_fat = sum(m["fat"] for m in meals)
+    workouts = await get_today_workouts(user["id"], for_date=date)
+    calories_burned = await get_calories_burned_by_date(user["id"], date)
+    return templates.TemplateResponse(
+        request,
+        "partials/day_detail.html",
+        {
+            "request": request,
+            "date": date,
+            "meals": meals,
+            "workouts": workouts,
+            "goals": goals,
+            "total_calories": total_cal,
+            "total_protein": total_pro,
+            "total_carbs": total_carb,
+            "total_fat": total_fat,
+            "calories_burned": round(calories_burned),
+        },
+    )
+
+
+@app.get("/note", response_class=HTMLResponse)
+async def get_workout_note(request: Request, d: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    if d is None:
+        d = date.today().isoformat()
+    content = await get_note(user["id"], d)
+    return templates.TemplateResponse(
+        request,
+        "partials/note_input.html",
+        {"request": request, "date": d, "content": content},
+    )
+
+
+@app.post("/note")
+async def save_workout_note(
+    request: Request,
+    d: str = Form(...),
+    content: str = Form(""),
+):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    await save_note(user["id"], d, content)
+    return templates.TemplateResponse(
+        request,
+        "partials/note_input.html",
+        {"request": request, "date": d, "content": content},
     )
 
 

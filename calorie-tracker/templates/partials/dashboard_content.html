@@ -1,51 +1,39 @@
 {% set cal_pct = (total_calories / goals.calorie_target * 100) | round %}
 {% if cal_pct > 100 %}{% set cal_pct = 100 %}{% endif %}
-{% set pro_pct = (total_protein / goals.protein_target * 100) | round %}
-{% if pro_pct > 100 %}{% set pro_pct = 100 %}{% endif %}
-{% set carb_pct = (total_carbs / goals.carbs_target * 100) | round %}
-{% if carb_pct > 100 %}{% set carb_pct = 100 %}{% endif %}
-{% set fat_pct = (total_fat / goals.fat_target * 100) | round %}
-{% if fat_pct > 100 %}{% set fat_pct = 100 %}{% endif %}
 {% set remaining = [goals.calorie_target - total_calories, 0] | max %}
+{% set net_remaining_cals = goals.calorie_target - total_calories + calories_burned %}
 
 <div class="px-4 pt-2 pb-1 flex justify-center">
     <div class="ring-container">
         <svg width="220" height="220" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="42" class="ring-bg" stroke-width="7"/>
             <circle cx="50" cy="50" r="42" class="ring-fill"
-                stroke="url(#ringGrad)" stroke-width="7"
+                stroke="#FF6B3D" stroke-width="7"
                 stroke-dasharray="263.89" stroke-dashoffset="{{ 263.89 - (263.89 * cal_pct / 100) }}"/>
-            <defs>
-                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#FF6B3D"/>
-                    <stop offset="60%" stop-color="#F0B429"/>
-                    <stop offset="100%" stop-color="#2ECC71"/>
-                </linearGradient>
-            </defs>
         </svg>
         <div class="ring-center">
             <span class="pct">{{ cal_pct | int }}%</span>
-            <span class="label">daily calories</span>
-            <span class="badge">{{ "Optimal" if cal_pct >= 80 and cal_pct <= 100 else "Building" if cal_pct < 80 else "Complete" }}</span>
+            <span class="label">of daily goal</span>
+            <span class="badge">{{ "%.0f"|format(total_calories) }} / {{ "%.0f"|format(goals.calorie_target) }} kcal</span>
         </div>
     </div>
 </div>
 
 <div class="px-4 pb-2">
-    <div class="flex gap-2">
+    <div class="grid grid-cols-3 gap-2">
         <div class="metric-card">
-            <div class="m-label">Calories</div>
+            <div class="m-label">Eaten</div>
             <div class="m-value">{{ "%.0f"|format(total_calories) }}</div>
             <div class="m-sub orange">{{ "%.0f"|format(goals.calorie_target) }} goal</div>
         </div>
         <div class="metric-card">
-            <div class="m-label">Protein</div>
-            <div class="m-value">{{ "%.0f"|format(total_protein) }}<span class="text-sm font-medium text-[#888]">g</span></div>
-            <div class="m-sub green">{{ "%.0f"|format(goals.protein_target) }}g goal</div>
+            <div class="m-label">Burned</div>
+            <div class="m-value">{{ "%.0f"|format(calories_burned) }}</div>
+            <div class="m-sub orange">from exercise</div>
         </div>
         <div class="metric-card">
             <div class="m-label">Remaining</div>
-            <div class="m-value">{{ "%.0f"|format(remaining) }}</div>
+            <div class="m-value">{{ "%.0f"|format([net_remaining_cals, 0] | max) }}</div>
             <div class="m-sub orange">kcal left</div>
         </div>
     </div>
@@ -53,7 +41,7 @@
 
 <div class="px-4 pb-2">
     <div class="dark-card p-3.5">
-        <p class="text-[13px] font-semibold text-white mb-2.5">7 Days Progress</p>
+        <p class="text-[13px] font-bold text-white mb-2.5">7 Days Progress</p>
         <div class="flex items-end justify-between gap-1.5">
             {% for i in range(7) %}
             {% set day_cal = week_data[i] if week_data and i < week_data|length else 0 %}
@@ -72,7 +60,7 @@
 </div>
 
 <div class="px-4 pb-1 stagger-enter">
-    <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-2">Today's meals</p>
+    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Today's Meals</p>
     {% set categories = [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snacks")] %}
     {% for key, label in categories %}
     {% set cat_meals = meals | selectattr("meal_type", "equalto", key) | list %}
@@ -80,7 +68,7 @@
     <div class="meal-row dark-card px-3.5 py-2.5 mb-1" onclick="toggleMealGroup(this)">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0
+                <div class="w-7 h-7 flex items-center justify-center shrink-0
                     {% if key == 'breakfast' %}" style="background:rgba(240,180,41,0.15)"
                     {% elif key == 'lunch' %}" style="background:rgba(46,204,113,0.15)"
                     {% elif key == 'dinner' %}" style="background:rgba(167,139,250,0.15)"
@@ -96,7 +84,7 @@
                     {% endif %}
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-gray-800">{{ label }}</p>
+                    <p class="text-sm font-bold text-white">{{ label }}</p>
                     <p class="text-[11px] text-gray-500">{{ cat_meals|length }} item{% if cat_meals|length != 1 %}s{% endif %} &middot; {{ "%.0f"|format(cat_cal) }} kcal</p>
                 </div>
             </div>
@@ -107,9 +95,9 @@
                 {% if cat_meals %}
                 {% for meal in cat_meals %}
                 <div class="flex items-center justify-between text-sm py-0.5">
-                    <span class="text-gray-700 text-[13px]">{{ meal.name }}</span>
+                    <span class="text-white text-[13px] font-medium">{{ meal.name }}</span>
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500 text-xs tabular-nums">{{ "%.0f"|format(meal.calories) }} kcal</span>
+                        <span class="text-gray-400 text-xs tabular-nums font-semibold">{{ "%.0f"|format(meal.calories) }} kcal</span>
                         <button hx-delete="/meals/{{ meal.id }}" hx-target="#dashboard-content" hx-swap="innerHTML"
                             class="text-gray-600 hover:text-[#FF6B3D] transition-colors p-0.5">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

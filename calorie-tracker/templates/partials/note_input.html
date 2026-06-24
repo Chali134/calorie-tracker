@@ -1,0 +1,10 @@
+<form hx-post="/note" hx-target="this" hx-swap="outerHTML" class="flex flex-col gap-2">
+    <input type="hidden" name="d" value="{{ date }}">
+    <textarea name="content" rows="4"
+        class="form-input text-sm resize-none"
+        placeholder="Plan your workout for this day...&#10;e.g. Bench Press 4x8, Squat 3x5, Pull Ups 3x10">{{ content }}</textarea>
+    <button type="submit"
+        class="self-end px-4 py-2 text-xs font-black uppercase tracking-wider bg-[#FF6B3D] text-white hover:opacity-80 transition-opacity border-2 border-[#FF6B3D]">
+        Save Note
+    </button>
+</form>

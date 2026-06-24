@@ -1,4 +1,5 @@
 import secrets
+from datetime import date, timedelta
 import aiosqlite
 from passlib.hash import bcrypt
 
@@ -103,6 +104,111 @@ FOODS_SEED = [
 ]
 
 
+EXERCISES_SEED = [
+    # (name, muscle_group, calories_per_hour)
+    ("Bench Press", "Chest", 350),
+    ("Incline Bench Press", "Chest", 330),
+    ("Decline Bench Press", "Chest", 340),
+    ("Dumbbell Bench Press", "Chest", 320),
+    ("Incline Dumbbell Press", "Chest", 310),
+    ("Push Ups", "Chest", 280),
+    ("Decline Push Ups", "Chest", 300),
+    ("Cable Flyes", "Chest", 260),
+    ("Pec Deck Machine", "Chest", 250),
+    ("Dumbbell Pullover", "Chest", 280),
+    ("Chest Dip", "Chest", 320),
+    ("Landmine Press", "Chest", 290),
+    ("Pull Ups", "Back", 320),
+    ("Chin Ups", "Back", 310),
+    ("Deadlift", "Back", 400),
+    ("Barbell Row", "Back", 340),
+    ("Pendlay Row", "Back", 350),
+    ("Meadows Row", "Back", 330),
+    ("T-Bar Row", "Back", 320),
+    ("Lat Pulldown", "Back", 290),
+    ("Seated Cable Row", "Back", 270),
+    ("Single Arm Dumbbell Row", "Back", 300),
+    ("Hyperextension", "Back", 200),
+    ("Shrugs", "Back", 190),
+    ("Straight Arm Pulldown", "Back", 240),
+    ("Rack Pull", "Back", 360),
+    ("Good Morning", "Back", 300),
+    ("Squat", "Legs", 420),
+    ("Front Squat", "Legs", 390),
+    ("Bulgarian Split Squat", "Legs", 380),
+    ("Goblet Squat", "Legs", 340),
+    ("Leg Press", "Legs", 350),
+    ("Romanian Deadlift", "Legs", 360),
+    ("Conventional Deadlift", "Legs", 400),
+    ("Sumo Deadlift", "Legs", 390),
+    ("Leg Extension", "Legs", 280),
+    ("Leg Curl", "Legs", 260),
+    ("Standing Calf Raises", "Legs", 220),
+    ("Seated Calf Raises", "Legs", 200),
+    ("Walking Lunges", "Legs", 340),
+    ("Reverse Lunges", "Legs", 320),
+    ("Curtsy Lunges", "Legs", 310),
+    ("Box Jumps", "Legs", 400),
+    ("Step Ups", "Legs", 290),
+    ("Hip Thrusts", "Legs", 310),
+    ("Glute Bridge", "Legs", 250),
+    ("Good Mornings", "Legs", 300),
+    ("Wall Sit", "Legs", 180),
+    ("Sissy Squat", "Legs", 280),
+    ("Overhead Press", "Shoulders", 310),
+    ("Seated Dumbbell Press", "Shoulders", 300),
+    ("Arnold Press", "Shoulders", 310),
+    ("Lateral Raise", "Shoulders", 240),
+    ("Cable Lateral Raise", "Shoulders", 230),
+    ("Front Raise", "Shoulders", 230),
+    ("Face Pull", "Shoulders", 250),
+    ("Reverse Flyes", "Shoulders", 220),
+    ("Upright Row", "Shoulders", 280),
+    ("Barbell Curl", "Arms", 200),
+    ("Dumbbell Curl", "Arms", 190),
+    ("Hammer Curl", "Arms", 200),
+    ("Preacher Curl", "Arms", 190),
+    ("Incline Dumbbell Curl", "Arms", 190),
+    ("Concentration Curl", "Arms", 180),
+    ("Cable Curl", "Arms", 190),
+    ("Tricep Pushdown", "Arms", 190),
+    ("Overhead Tricep Extension", "Arms", 200),
+    ("Skull Crushers", "Arms", 200),
+    ("Close Grip Bench", "Arms", 210),
+    ("Dips", "Arms", 290),
+    ("Tricep Kickback", "Arms", 170),
+    ("Bench Dip", "Arms", 240),
+    ("Wrist Curl", "Arms", 120),
+    ("Reverse Curl", "Arms", 180),
+    ("Plank", "Core", 200),
+    ("Side Plank", "Core", 180),
+    ("Crunches", "Core", 180),
+    ("Bicycle Crunches", "Core", 230),
+    ("Leg Raises", "Core", 190),
+    ("Hanging Leg Raises", "Core", 240),
+    ("Russian Twists", "Core", 220),
+    ("Hanging Knee Raises", "Core", 230),
+    ("Ab Wheel Rollout", "Core", 210),
+    ("Pallof Press", "Core", 170),
+    ("Dead Bug", "Core", 160),
+    ("Reverse Crunch", "Core", 180),
+    ("V-Up", "Core", 200),
+    ("Running (moderate)", "Cardio", 500),
+    ("Running (fast)", "Cardio", 650),
+    ("Cycling (moderate)", "Cardio", 400),
+    ("Cycling (fast)", "Cardio", 550),
+    ("Swimming", "Cardio", 450),
+    ("Jump Rope", "Cardio", 550),
+    ("Rowing Machine", "Cardio", 420),
+    ("Walking", "Cardio", 200),
+    ("Stairmaster", "Cardio", 450),
+    ("HIIT", "Cardio", 600),
+    ("Elliptical", "Cardio", 380),
+    ("Burpees", "Cardio", 480),
+    ("Mountain Climbers", "Cardio", 400),
+]
+
+
 SERVING_SIZES = [
     # (unit, grams)
     ("g (100g)", 100),
@@ -202,6 +308,35 @@ async def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
+        CREATE TABLE IF NOT EXISTS exercises (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            muscle_group TEXT NOT NULL,
+            calories_per_hour REAL NOT NULL DEFAULT 200
+        );
+        CREATE TABLE IF NOT EXISTS workouts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            exercise_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            sets INTEGER NOT NULL DEFAULT 3,
+            reps INTEGER NOT NULL DEFAULT 10,
+            weight_kg REAL DEFAULT 0,
+            completed INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (exercise_id) REFERENCES exercises(id)
+        );
+        CREATE TABLE IF NOT EXISTS workout_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_workout_notes_date ON workout_notes(user_id, date);
     """)
     await db.commit()
 
@@ -272,6 +407,17 @@ async def init_db():
     else:
         # Update existing foods that have NULL serving columns
         await db.execute("UPDATE foods SET serving_size_g=100, serving_unit='g' WHERE serving_size_g IS NULL")
+        await db.commit()
+
+    # Seed exercises
+    exc_count = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM exercises")
+    if exc_count[0]["cnt"] == 0:
+        for row in EXERCISES_SEED:
+            name, mg, cph = row
+            await db.execute(
+                "INSERT OR IGNORE INTO exercises (name, muscle_group, calories_per_hour) VALUES (?, ?, ?)",
+                (name, mg, cph),
+            )
         await db.commit()
 
     await db.close()
@@ -469,3 +615,219 @@ async def get_recent_foods(user_id: int, limit: int = 5) -> list[dict]:
     )
     await db.close()
     return [dict(r) for r in rows]
+
+
+# ── Exercise / Workout functions ─────────────────────────
+
+async def get_exercises(muscle_group: str | None = None) -> list[dict]:
+    db = await get_db()
+    if muscle_group:
+        rows = await db.execute_fetchall(
+            "SELECT * FROM exercises WHERE muscle_group = ? ORDER BY name", (muscle_group,)
+        )
+    else:
+        rows = await db.execute_fetchall("SELECT * FROM exercises ORDER BY muscle_group, name")
+    await db.close()
+    return [dict(r) for r in rows]
+
+
+async def get_exercise_by_id(exercise_id: int) -> dict | None:
+    db = await get_db()
+    row = await db.execute_fetchall("SELECT * FROM exercises WHERE id = ?", (exercise_id,))
+    await db.close()
+    return dict(row[0]) if row else None
+
+
+async def get_muscle_groups() -> list[str]:
+    db = await get_db()
+    rows = await db.execute_fetchall("SELECT DISTINCT muscle_group FROM exercises ORDER BY muscle_group")
+    await db.close()
+    return [r["muscle_group"] for r in rows]
+
+
+async def log_workout(user_id: int, exercise_id: int, sets: int, reps: int, weight_kg: float) -> dict:
+    today = date.today().isoformat()
+    db = await get_db()
+    await db.execute(
+        "INSERT INTO workouts (user_id, exercise_id, date, sets, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, exercise_id, today, sets, reps, weight_kg),
+    )
+    await db.commit()
+    row = await db.execute_fetchall("SELECT * FROM workouts WHERE id = last_insert_rowid()")
+    await db.close()
+    return dict(row[0]) if row else {}
+
+
+async def get_today_workouts(user_id: int, for_date: str | None = None) -> list[dict]:
+    target_date = for_date if for_date else date.today().isoformat()
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        """SELECT w.*, e.name as exercise_name, e.muscle_group, e.calories_per_hour
+           FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+           WHERE w.user_id = ? AND w.date = ?
+           ORDER BY w.created_at DESC""",
+        (user_id, target_date),
+    )
+    await db.close()
+    return [dict(r) for r in rows]
+
+
+async def delete_workout(workout_id: int, user_id: int):
+    db = await get_db()
+    await db.execute("DELETE FROM workouts WHERE id = ? AND user_id = ?", (workout_id, user_id))
+    await db.commit()
+    await db.close()
+
+
+async def complete_workout(workout_id: int, user_id: int):
+    db = await get_db()
+    await db.execute("UPDATE workouts SET completed = 1 WHERE id = ? AND user_id = ?", (workout_id, user_id))
+    await db.commit()
+    await db.close()
+
+
+async def get_calories_burned_today(user_id: int) -> float:
+    today = date.today().isoformat()
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        """SELECT SUM(e.calories_per_hour * 1.0 / 30 * w.sets) as total
+           FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+           WHERE w.user_id = ? AND w.date = ? AND w.completed = 1""",
+        (user_id, today),
+    )
+    await db.close()
+    return rows[0]["total"] or 0 if rows else 0
+
+
+async def get_calories_burned_by_date(user_id: int, target_date: str) -> float:
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        """SELECT SUM(e.calories_per_hour * 1.0 / 30 * w.sets) as total
+           FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+           WHERE w.user_id = ? AND w.date = ? AND w.completed = 1""",
+        (user_id, target_date),
+    )
+    await db.close()
+    return rows[0]["total"] or 0 if rows else 0
+
+
+async def get_workout_week_data(user_id: int) -> list[dict]:
+    today = date.today()
+    db = await get_db()
+    week = []
+    for i in range(6, -1, -1):
+        d = (today - timedelta(days=i)).isoformat()
+        rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as count, COALESCE(SUM(completed), 0) as completed FROM workouts WHERE user_id = ? AND date = ?",
+            (user_id, d),
+        )
+        cal_rows = await db.execute_fetchall(
+            """SELECT COALESCE(SUM(e.calories_per_hour * 1.0 / 30 * w.sets), 0) as cals
+               FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+               WHERE w.user_id = ? AND w.date = ? AND w.completed = 1""",
+            (user_id, d),
+        )
+        week.append({
+            "date": d,
+            "count": rows[0]["count"],
+            "completed": rows[0]["completed"],
+            "calories": cal_rows[0]["cals"] or 0,
+        })
+    await db.close()
+    return week
+
+
+async def get_total_volume_today(user_id: int) -> float:
+    today = date.today().isoformat()
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        "SELECT COALESCE(SUM(sets * reps * weight_kg), 0) as vol FROM workouts WHERE user_id = ? AND date = ?",
+        (user_id, today),
+    )
+    await db.close()
+    return rows[0]["vol"] or 0 if rows else 0
+
+
+async def get_workout_stats(user_id: int) -> dict:
+    db = await get_db()
+    total_wk = await db.execute_fetchall("SELECT COUNT(DISTINCT date) as days FROM workouts WHERE user_id = ?", (user_id,))
+    total_ex = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM workouts WHERE user_id = ?", (user_id,))
+    fav = await db.execute_fetchall(
+        """SELECT e.name, COUNT(*) as cnt FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+           WHERE w.user_id = ? GROUP BY e.id ORDER BY cnt DESC LIMIT 1""",
+        (user_id,),
+    )
+    total_vol = await db.execute_fetchall(
+        "SELECT COALESCE(SUM(sets * reps * weight_kg), 0) as vol FROM workouts WHERE user_id = ?",
+        (user_id,),
+    )
+    await db.close()
+    return {
+        "workout_days": total_wk[0]["days"] or 0,
+        "total_exercises": total_ex[0]["cnt"] or 0,
+        "favorite_exercise": fav[0]["name"] if fav else "—",
+        "total_volume": total_vol[0]["vol"] or 0,
+    }
+
+
+async def get_month_heatmap(user_id: int, months_back: int = 2) -> list[dict]:
+    today = date.today()
+    start = (today - timedelta(days=months_back * 30)).isoformat()
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        """SELECT date, COUNT(*) as count, COALESCE(SUM(completed), 0) as completed
+           FROM workouts WHERE user_id = ? AND date >= ?
+           GROUP BY date ORDER BY date""",
+        (user_id, start),
+    )
+    await db.close()
+    return [dict(r) for r in rows]
+
+
+async def get_heatmap_grid(user_id: int, days: int = 60) -> list[dict]:
+    today = date.today()
+    raw = await get_month_heatmap(user_id, months_back=2)
+    heat = {h["date"]: h["completed"] for h in raw}
+    grid = []
+    for i in range(days):
+        d = today - timedelta(days=days - 1 - i)
+        ds = d.isoformat()
+        grid.append({"date": ds, "count": heat.get(ds, 0)})
+    return grid
+
+
+async def get_net_calories_today(user_id: int) -> dict:
+    db = await get_db()
+    today = date.today().isoformat()
+    eaten = await db.execute_fetchall(
+        "SELECT COALESCE(SUM(calories), 0) as cal FROM meals WHERE user_id = ? AND date = ?",
+        (user_id, today),
+    )
+    burned = await db.execute_fetchall(
+        """SELECT COALESCE(SUM(e.calories_per_hour * 1.0 / 30 * w.sets), 0) as cal
+           FROM workouts w JOIN exercises e ON w.exercise_id = e.id
+           WHERE w.user_id = ? AND w.date = ? AND w.completed = 1""",
+        (user_id, today),
+    )
+    await db.close()
+    return {"eaten": eaten[0]["cal"] or 0, "burned": burned[0]["cal"] or 0}
+
+
+async def get_note(user_id: int, target_date: str) -> str:
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        "SELECT content FROM workout_notes WHERE user_id = ? AND date = ?",
+        (user_id, target_date),
+    )
+    await db.close()
+    return rows[0]["content"] if rows else ""
+
+
+async def save_note(user_id: int, target_date: str, content: str):
+    db = await get_db()
+    await db.execute(
+        "INSERT INTO workout_notes (user_id, date, content) VALUES (?, ?, ?) ON CONFLICT(user_id, date) DO UPDATE SET content = ?, updated_at = CURRENT_TIMESTAMP",
+        (user_id, target_date, content, content),
+    )
+    await db.commit()
+    await db.close()

@@ -1,0 +1,156 @@
+<div id="training-root" class="flex flex-col flex-1 px-4 pt-4 pb-4">
+    <div class="flex items-center justify-between mb-4">
+        <p class="text-xl font-black text-white tracking-tight">Training</p>
+        <span class="text-xs font-bold text-orange-500 uppercase tracking-wider">{{ "%.0f"|format(calories_burned) }} kcal burned</span>
+    </div>
+
+    <!-- Today's workouts grouped by muscle group -->
+    <div class="dark-card p-3.5 mb-3">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-base font-bold text-white">Today's Workout</p>
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ today_workouts|length }} exercises</span>
+        </div>
+        {% if today_workouts %}
+        {% for group in today_workouts|groupby("muscle_group") %}
+        {% set mg = group.grouper %}
+        {% set mg_exercises = group.list %}
+        {% set mg_cal = (mg_exercises | sum(attribute="calories_per_hour")) %}
+        <div class="workout-group border-2 border-[#2A2A2A] mb-1.5" onclick="toggleWorkoutGroup(this)">
+            <div class="flex items-center justify-between px-3 py-2.5 bg-[#1A1A1A] cursor-pointer">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 flex items-center justify-center text-xs font-black text-white bg-[#2A2A2A] shrink-0">{{ mg[:2].upper() }}</div>
+                    <div>
+                        <p class="text-sm font-bold text-white">{{ mg }}</p>
+                        <p class="text-[11px] text-gray-500">{{ mg_exercises|length }} exercise{% if mg_exercises|length != 1 %}s{% endif %} &middot; {{ mg_cal|round|int }} kcal</p>
+                    </div>
+                </div>
+                <svg class="chevron transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sub-items" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
+                <div class="px-3 pb-2 pt-1 border-t border-[#1E1E1E] space-y-1">
+                    {% for w in mg_exercises %}
+                    <div class="flex items-center justify-between py-1.5">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-sm font-bold text-white truncate">{{ w.exercise_name }}</span>
+                            <span class="text-xs text-gray-500 shrink-0">{{ w.sets }}×{{ w.reps }}{% if w.weight_kg > 0 %} @ {{ "%.0f"|format(w.weight_kg) }} kg{% endif %} &middot; {{ (w.calories_per_hour / 30 * w.sets)|round|int }} kcal</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            {% if w.completed %}
+                            <span class="w-7 h-7 flex items-center justify-center bg-[#2ECC71] text-white text-xs font-black">✓</span>
+                            {% else %}
+                            <button hx-post="/workouts/{{ w.id }}/complete" hx-target="#training-root" hx-swap="outerHTML"
+                                class="w-7 h-7 flex items-center justify-center border-2 border-[#2A2A2A] text-gray-500 hover:border-[#2ECC71] hover:text-[#2ECC71] text-xs font-black transition-colors">✓</button>
+                            {% endif %}
+                            <button hx-delete="/workouts/{{ w.id }}" hx-target="#training-root" hx-swap="outerHTML"
+                                class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-[#FF6B3D] transition-colors">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-sm text-gray-500 text-center py-5">No exercises logged today. Add one below!</p>
+        {% endif %}
+    </div>
+
+    <!-- Muscle filter -->
+    <div class="flex gap-2 mb-3 flex-wrap">
+        <button onclick="filterMuscle('')"
+            class="px-4 py-2 text-xs font-bold uppercase tracking-wider border-2 {% if not selected_muscle %}bg-[#FF6B3D] border-[#FF6B3D] text-white{% else %}border-[#2A2A2A] text-gray-500 hover:border-[#444]{% endif %} transition-colors">
+            All
+        </button>
+        {% for mg in muscle_groups %}
+        <button onclick="filterMuscle('{{ mg }}')"
+            class="px-4 py-2 text-xs font-bold uppercase tracking-wider border-2 {% if selected_muscle == mg %}bg-[#FF6B3D] border-[#FF6B3D] text-white{% else %}border-[#2A2A2A] text-gray-500 hover:border-[#444]{% endif %} transition-colors">
+            {{ mg }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Exercise grid (fills remaining space) -->
+    <div class="flex-1 overflow-y-auto space-y-1.5 min-h-0" id="exercise-list">
+        {% for ex in all_exercises %}
+        <div class="exercise-row px-4 py-3 border-2 border-[#2A2A2A] bg-[#1A1A1A] hover:border-[#444] transition-colors">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 flex items-center justify-center text-xs font-black text-white bg-[#FF6B3D] shrink-0">{{ ex.name[:2].upper() }}</div>
+                    <div class="min-w-0">
+                        <p class="text-base font-bold text-white truncate">{{ ex.name }}</p>
+                        <p class="text-xs text-gray-500">{{ ex.muscle_group }} &middot; {{ "%.0f"|format(ex.calories_per_hour) }} cal/hr</p>
+                    </div>
+                </div>
+                <button onclick="showWorkoutForm('{{ ex.id }}')"
+                    class="px-4 py-2 text-xs font-bold uppercase tracking-wider border-2 border-[#FF6B3D] text-[#FF6B3D] hover:bg-[#FF6B3D] hover:text-white transition-colors shrink-0">
+                    + Add
+                </button>
+            </div>
+            <div id="wf-{{ ex.id }}" class="hidden mt-3 pt-3 border-t border-[#2A2A2A]">
+                <form hx-post="/workouts" hx-target="#training-root" hx-swap="outerHTML" class="flex items-end gap-3">
+                    <input type="hidden" name="exercise_id" value="{{ ex.id }}">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Sets</label>
+                        <input type="number" name="sets" value="3" min="1" max="20" class="w-14 px-2 py-2 bg-transparent border-2 border-[#2A2A2A] text-white text-sm font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Reps</label>
+                        <input type="number" name="reps" value="10" min="1" max="100" class="w-16 px-2 py-2 bg-transparent border-2 border-[#2A2A2A] text-white text-sm font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Weight</label>
+                        <input type="number" name="weight_kg" value="0" min="0" step="0.5" class="w-20 px-2 py-2 bg-transparent border-2 border-[#2A2A2A] text-white text-sm font-bold text-center">
+                    </div>
+                    <button type="submit" class="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-[#FF6B3D] text-white hover:opacity-80 transition-opacity">
+                        Log
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function toggleWorkoutGroup(card) {
+    const sub = card.querySelector('.sub-items');
+    const chevron = card.querySelector('.chevron');
+    const isOpen = card.dataset.open === '1';
+    if (isOpen) {
+        sub.style.maxHeight = '0';
+        chevron.style.transform = 'rotate(0deg)';
+        card.dataset.open = '0';
+    } else {
+        sub.style.maxHeight = sub.scrollHeight + 'px';
+        chevron.style.transform = 'rotate(180deg)';
+        card.dataset.open = '1';
+    }
+}
+
+function filterMuscle(muscle) {
+    htmx.ajax('GET', '/training', {
+        values: { muscle: muscle },
+        target: '#training-root',
+        swap: 'outerHTML'
+    });
+}
+
+function showWorkoutForm(id) {
+    const form = document.getElementById('wf-' + id);
+    if (form) {
+        const isHidden = form.classList.contains('hidden');
+        document.querySelectorAll('[id^="wf-"]').forEach(el => el.classList.add('hidden'));
+        if (isHidden) {
+            form.classList.remove('hidden');
+        }
+    }
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.exercise-row')) {
+        document.querySelectorAll('[id^="wf-"]').forEach(el => el.classList.add('hidden'));
+    }
+});
+</script>
