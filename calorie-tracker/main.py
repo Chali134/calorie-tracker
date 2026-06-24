@@ -365,7 +365,7 @@ async def meal_list(request: Request, d: str | None = None):
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -483,7 +483,7 @@ async def add_meal(
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -521,7 +521,7 @@ async def delete_meal(request: Request, meal_id: int):
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
@@ -603,14 +603,16 @@ async def update_reminder(
 # ── Training / Workout routes ────────────────────────────
 
 @app.get("/training", response_class=HTMLResponse)
-async def training_content(request: Request, muscle: str | None = None):
+async def training_content(request: Request, muscle: str | None = None, d: str | None = None):
     user = await get_current_user(request)
     if not user:
         return HTMLResponse("")
+    if d is None:
+        d = date.today().isoformat()
     muscle_groups = await get_muscle_groups()
     all_exercises = await get_exercises(muscle)
     today_workouts = await get_today_workouts(user["id"])
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/training_content.html",
@@ -632,13 +634,16 @@ async def add_workout(
     sets: int = Form(3),
     reps: int = Form(10),
     weight_kg: float = Form(0),
+    d: str | None = Form(None),
 ):
     user = await get_current_user(request)
     if not user:
         return HTMLResponse("", status_code=401)
+    if d is None:
+        d = date.today().isoformat()
     await log_workout(user["id"], exercise_id, sets, reps, weight_kg)
     today_workouts = await get_today_workouts(user["id"])
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     muscle_groups = await get_muscle_groups()
     return templates.TemplateResponse(
         request,
@@ -659,9 +664,15 @@ async def remove_workout(request: Request, workout_id: int):
     user = await get_current_user(request)
     if not user:
         return HTMLResponse("", status_code=401)
+    db = await get_db()
+    rows = await db.execute_fetchall("SELECT date FROM workouts WHERE id = ? AND user_id = ?", (workout_id, user["id"]))
+    d = date.today().isoformat()
+    if rows:
+        d = rows[0]["date"]
+    await db.close()
     await delete_workout(workout_id, user["id"])
     today_workouts = await get_today_workouts(user["id"])
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     muscle_groups = await get_muscle_groups()
     return templates.TemplateResponse(
         request,
@@ -682,9 +693,15 @@ async def toggle_workout_complete(request: Request, workout_id: int):
     user = await get_current_user(request)
     if not user:
         return HTMLResponse("", status_code=401)
+    db = await get_db()
+    rows = await db.execute_fetchall("SELECT date FROM workouts WHERE id = ? AND user_id = ?", (workout_id, user["id"]))
+    d = date.today().isoformat()
+    if rows:
+        d = rows[0]["date"]
+    await db.close()
     await complete_workout(workout_id, user["id"])
     today_workouts = await get_today_workouts(user["id"])
-    calories_burned = await get_calories_burned_today(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     muscle_groups = await get_muscle_groups()
     return templates.TemplateResponse(
         request,
