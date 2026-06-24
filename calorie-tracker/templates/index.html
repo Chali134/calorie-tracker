@@ -111,19 +111,19 @@
                 <!-- Quick stats row -->
                 {% set total_meals = meals|length %}
                 <div class="grid grid-cols-4 gap-2 mb-4">
-                    <div class="dark-card p-2.5 text-center">
+                    <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ total_meals }}</p>
                         <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Meals</p>
                     </div>
-                    <div class="dark-card p-2.5 text-center">
+                    <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ "%.0f"|format(calories_burned) }}</p>
                         <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Burned</p>
                     </div>
-                    <div class="dark-card p-2.5 text-center">
+                    <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ today_workouts|length }}</p>
                         <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Exercises</p>
                     </div>
-                    <div class="dark-card p-2.5 text-center">
+                    <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ streak }}</p>
                         <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Streak</p>
                     </div>
@@ -170,7 +170,7 @@
                 <!-- Settings -->
                 <p class="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">Settings</p>
                 <div class="dark-card overflow-hidden">
-                    <div onclick="openRemindersModal()" class="flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
+                    <div onclick="openRemindersModal()" class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
                         <div class="flex items-center gap-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B3D" stroke-width="2.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                             <span class="text-sm font-bold text-white">Reminders</span>
@@ -178,14 +178,14 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                     <a href="/export" download
-                        class="flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors no-underline">
+                        class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors no-underline">
                         <div class="flex items-center gap-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             <span class="text-sm font-bold text-white">Export data</span>
                         </div>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
-                    <form method="post" action="/logout" onclick="this.submit()" class="flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
+                    <form method="post" action="/logout" onclick="this.submit()" class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
                         <div class="flex items-center gap-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                             <span class="text-sm font-bold text-red-500">Sign out</span>
@@ -197,7 +197,7 @@
                 <!-- Credits -->
                 <div class="mt-4 pt-4 border-t-2 border-[#1E1E1E] text-center px-2">
                     <a href="https://www.instagram.com/theodoesgame/" target="_blank" rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-[#2A2A2A] text-gray-400 hover:text-white hover:border-[#FF6B3D] transition-colors no-underline mb-2">
+                        class="btn-lift inline-flex items-center gap-2 px-4 py-2.5 border-2 border-[#2A2A2A] text-gray-400 hover:text-white hover:border-[#FF6B3D] transition-colors no-underline mb-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
                         <span class="text-xs font-bold uppercase tracking-wider">Follow @theodoesgame</span>
                     </a>
