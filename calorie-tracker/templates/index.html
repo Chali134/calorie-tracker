@@ -341,7 +341,7 @@ setTimeout(checkReminders, 2000);
             <input type="text" id="food-search" placeholder="Search or type a food..."
                 autocomplete="off"
                 class="w-full px-3.5 py-2.5 dark-card  text-sm placeholder:text-gray-500 focus:outline-none focus:border-[#FF6B3D] transition-colors"
-                oninput="searchFoods(this.value)">
+                oninput="searchFoods(this.value); document.getElementById('f-name').value = this.value">
             <div id="food-results-container" class="relative"></div>
         </div>
 
@@ -380,7 +380,7 @@ setTimeout(checkReminders, 2000);
             <div class="grid grid-cols-4 gap-1.5">
                 <div>
                     <label class="block text-[10px] font-medium text-gray-500 mb-0.5">Cal</label>
-                    <input type="number" name="calories" id="f-calories" step="0.1" min="0" required
+                    <input type="number" name="calories" id="f-calories" step="0.1" min="0" value="0" required
                         class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
                 </div>
                 <div>
@@ -473,6 +473,7 @@ function setServing(unit, grams) {
 }
 
 function updateMacroPreview() {
+    if (!currentBase || typeof currentBase.cal !== 'number') return;
     const servings = parseFloat(document.getElementById('f-servings').value) || 1;
     const factor = servings * (currentServingG / currentBaseServingG);
     const cal = Math.round(currentBase.cal * factor * 10) / 10;
