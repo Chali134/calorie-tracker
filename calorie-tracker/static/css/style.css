@@ -816,7 +816,28 @@ button:active {
     transform: scale(0.97);
 }
 
-/* ── Mobile Layout Optimizations ────────────── */
+/* ── HTMX Loading States ────────────── */
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+.htmx-indicator {
+    display: none;
+}
+
+/* Smooth content swap transitions */
+.htmx-settling {
+    opacity: 0.8;
+}
+.htmx-added.htmx-settling {
+    animation: slideUp 0.35s var(--ease-out-expo) forwards;
+}
+
+/* Tab content loading state */
+.tab-content.htmx-request {
+    opacity: 0.6;
+}
+
+/* Mobile Layout Optimizations ────────────── */
 @media (max-width: 1023px) {
     /* Reduce padding on mobile */
     .px-4 { padding-left: 12px; padding-right: 12px; }

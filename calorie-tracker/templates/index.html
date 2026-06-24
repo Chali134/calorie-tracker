@@ -453,16 +453,29 @@ setTimeout(checkReminders, 2000);
 // ── Tab switching ──────────────────────────
 
 function switchTab(tabId, btn) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    // Remove active class from all tabs and nav items
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+    });
     document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.remove('active');
     });
+    
+    // Add active class to new tab
     const tab = document.getElementById('tab-' + tabId);
     if (tab) tab.classList.add('active');
+    
     if (btn) {
         btn.classList.add('active');
     }
-    document.getElementById('app-content').scrollTop = 0;
+    
+    // Scroll to top with smooth behavior
+    const appContent = document.getElementById('app-content');
+    if (appContent) {
+        appContent.scrollTop = 0;
+    }
+    
+    // Load fresh content for tabs
     if (tabId === 'home') {
         htmx.ajax('GET', '/meals', { target: '#dashboard-content', swap: 'innerHTML' });
     } else if (tabId === 'progress') {
