@@ -1,0 +1,529 @@
+
+<h2 class="sr-only">CalTrack app interactive UI/UX mockup — dashboard, food log, and progress screens with animated macro rings, expandable meal cards, and water tracker</h2>
+<style>
+.nav-btn{color:var(--color-text-tertiary);transition:color .2s;background:none;border:none;cursor:pointer;}
+.nav-btn.active{color:#D85A30;}
+.nav-btn.active span{color:#D85A30;font-weight:500;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.slide-in{animation:slideUp .25s ease forwards;}
+@keyframes ripple{0%{transform:scale(0);opacity:.5}100%{transform:scale(3);opacity:0}}
+.meal-row{transition:background .15s;}
+.meal-row:hover{background:var(--color-background-tertiary)!important;}
+</style>
+
+<div style="background:var(--color-background-secondary);border-radius:20px;padding:20px;display:flex;justify-content:center;">
+<div style="width:340px;background:var(--color-background-primary);border-radius:36px;border:.5px solid var(--color-border-tertiary);overflow:hidden;display:flex;flex-direction:column;min-height:700px;">
+
+  <!-- status bar -->
+  <div style="padding:14px 22px 0;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">9:41</span>
+    <div style="display:flex;gap:5px;color:var(--color-text-primary);">
+      <i class="ti ti-wifi" style="font-size:13px;" aria-hidden="true"></i>
+      <i class="ti ti-battery-3" style="font-size:13px;" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <!-- scrollable content -->
+  <div id="app-content" style="flex:1;overflow-y:auto;overflow-x:hidden;">
+
+    <!-- ====== DASHBOARD ====== -->
+    <div id="s-dash">
+      <div style="padding:10px 18px 0;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <p style="font-size:12px;color:var(--color-text-secondary);margin:0;">Good morning</p>
+          <p style="font-size:19px;font-weight:500;margin:2px 0 0;color:var(--color-text-primary);">Alex 👋</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:#FAEEDA;border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:4px;">
+            <i class="ti ti-flame" style="font-size:13px;color:#BA7517;" aria-hidden="true"></i>
+            <span style="font-size:12px;font-weight:500;color:#412402;">7 days</span>
+          </div>
+          <div style="width:34px;height:34px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#085041;">A</div>
+        </div>
+      </div>
+
+      <!-- macro rings -->
+      <div style="display:flex;justify-content:center;padding:14px 0 6px;position:relative;">
+        <div style="position:relative;width:196px;height:196px;">
+          <svg width="196" height="196" viewBox="0 0 196 196" style="transform:rotate(-90deg);display:block;">
+            <circle cx="98" cy="98" r="80" fill="none" stroke="#F5C4B3" stroke-width="10"/>
+            <circle cx="98" cy="98" r="63" fill="none" stroke="#9FE1CB" stroke-width="10"/>
+            <circle cx="98" cy="98" r="46" fill="none" stroke="#FAC775" stroke-width="10"/>
+            <circle cx="98" cy="98" r="29" fill="none" stroke="#CECBF6" stroke-width="10"/>
+            <circle id="r-cal" cx="98" cy="98" r="80" fill="none" stroke="#D85A30" stroke-width="10" stroke-linecap="round" stroke-dasharray="502.65" stroke-dashoffset="502.65" style="transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1);"/>
+            <circle id="r-pro" cx="98" cy="98" r="63" fill="none" stroke="#1D9E75" stroke-width="10" stroke-linecap="round" stroke-dasharray="395.84" stroke-dashoffset="395.84" style="transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1) .12s;"/>
+            <circle id="r-car" cx="98" cy="98" r="46" fill="none" stroke="#BA7517" stroke-width="10" stroke-linecap="round" stroke-dasharray="289.03" stroke-dashoffset="289.03" style="transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1) .24s;"/>
+            <circle id="r-fat" cx="98" cy="98" r="29" fill="none" stroke="#7F77DD" stroke-width="10" stroke-linecap="round" stroke-dasharray="182.21" stroke-dashoffset="182.21" style="transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1) .36s;"/>
+          </svg>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+            <p id="c-cal" style="font-size:24px;font-weight:500;margin:0;color:var(--color-text-primary);">0</p>
+            <p style="font-size:10px;color:var(--color-text-secondary);margin:2px 0 0;">/ 2,200 kcal</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- macro pills -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 10px;">
+        <div style="background:#E1F5EE;border-radius:10px;padding:9px 7px;text-align:center;">
+          <div style="width:7px;height:7px;border-radius:50%;background:#1D9E75;margin:0 auto 4px;"></div>
+          <p id="c-pro" style="font-size:14px;font-weight:500;margin:0;color:#085041;">0g</p>
+          <p style="font-size:10px;color:#0F6E56;margin:1px 0 0;">Protein / 150g</p>
+        </div>
+        <div style="background:#FAEEDA;border-radius:10px;padding:9px 7px;text-align:center;">
+          <div style="width:7px;height:7px;border-radius:50%;background:#BA7517;margin:0 auto 4px;"></div>
+          <p id="c-car" style="font-size:14px;font-weight:500;margin:0;color:#412402;">0g</p>
+          <p style="font-size:10px;color:#854F0B;margin:1px 0 0;">Carbs / 250g</p>
+        </div>
+        <div style="background:#EEEDFE;border-radius:10px;padding:9px 7px;text-align:center;">
+          <div style="width:7px;height:7px;border-radius:50%;background:#7F77DD;margin:0 auto 4px;"></div>
+          <p id="c-fat" style="font-size:14px;font-weight:500;margin:0;color:#26215C;">0g</p>
+          <p style="font-size:10px;color:#534AB7;margin:1px 0 0;">Fat / 65g</p>
+        </div>
+      </div>
+
+      <!-- calorie bar -->
+      <div style="margin:0 16px 12px;background:var(--color-background-secondary);border-radius:10px;padding:9px 12px;border:.5px solid var(--color-border-tertiary);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);">Eaten</span>
+          <span style="font-size:11px;color:var(--color-text-secondary);">Remaining</span>
+        </div>
+        <div style="height:5px;background:var(--color-background-tertiary);border-radius:3px;overflow:hidden;margin-bottom:5px;">
+          <div id="cal-bar" style="height:100%;background:#D85A30;border-radius:3px;width:0;transition:width 1.3s cubic-bezier(.4,0,.2,1);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span id="c-eaten" style="font-size:12px;font-weight:500;color:#D85A30;">0 kcal</span>
+          <span id="c-remain" style="font-size:12px;font-weight:500;color:var(--color-text-primary);">2,200 kcal</span>
+        </div>
+      </div>
+
+      <!-- meals section -->
+      <div style="padding:0 16px;">
+        <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;">Today's meals</p>
+
+        <div class="meal-row" onclick="toggleMeal(this)" style="background:var(--color-background-secondary);border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer;border:.5px solid var(--color-border-tertiary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;border-radius:9px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-sun" style="font-size:15px;color:#BA7517;" aria-hidden="true"></i></div>
+              <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary);">Breakfast</p><p style="font-size:11px;color:var(--color-text-secondary);margin:1px 0 0;">3 items · 520 kcal</p></div>
+            </div>
+            <i class="ti ti-chevron-down" style="font-size:15px;color:var(--color-text-tertiary);transition:transform .25s;" aria-hidden="true"></i>
+          </div>
+          <div style="max-height:0;overflow:hidden;transition:max-height .35s ease;">
+            <div style="margin-top:9px;border-top:.5px solid var(--color-border-tertiary);padding-top:9px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Oatmeal with banana</span><span style="font-size:12px;color:var(--color-text-secondary);">310 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Greek yogurt</span><span style="font-size:12px;color:var(--color-text-secondary);">150 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Black coffee</span><span style="font-size:12px;color:var(--color-text-secondary);">5 kcal</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="meal-row" onclick="toggleMeal(this)" style="background:var(--color-background-secondary);border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer;border:.5px solid var(--color-border-tertiary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;border-radius:9px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-salad" style="font-size:15px;color:#1D9E75;" aria-hidden="true"></i></div>
+              <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary);">Lunch</p><p style="font-size:11px;color:var(--color-text-secondary);margin:1px 0 0;">4 items · 680 kcal</p></div>
+            </div>
+            <i class="ti ti-chevron-down" style="font-size:15px;color:var(--color-text-tertiary);transition:transform .25s;" aria-hidden="true"></i>
+          </div>
+          <div style="max-height:0;overflow:hidden;transition:max-height .35s ease;">
+            <div style="margin-top:9px;border-top:.5px solid var(--color-border-tertiary);padding-top:9px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Chicken breast (150g)</span><span style="font-size:12px;color:var(--color-text-secondary);">248 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Brown rice (100g)</span><span style="font-size:12px;color:var(--color-text-secondary);">215 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Mixed salad</span><span style="font-size:12px;color:var(--color-text-secondary);">145 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Olive oil dressing</span><span style="font-size:12px;color:var(--color-text-secondary);">72 kcal</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="meal-row" onclick="toggleMeal(this)" style="background:var(--color-background-secondary);border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer;border:.5px solid var(--color-border-tertiary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;border-radius:9px;background:#FAECE7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-apple" style="font-size:15px;color:#D85A30;" aria-hidden="true"></i></div>
+              <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary);">Snacks</p><p style="font-size:11px;color:var(--color-text-secondary);margin:1px 0 0;">2 items · 450 kcal</p></div>
+            </div>
+            <i class="ti ti-chevron-down" style="font-size:15px;color:var(--color-text-tertiary);transition:transform .25s;" aria-hidden="true"></i>
+          </div>
+          <div style="max-height:0;overflow:hidden;transition:max-height .35s ease;">
+            <div style="margin-top:9px;border-top:.5px solid var(--color-border-tertiary);padding-top:9px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Almonds (40g)</span><span style="font-size:12px;color:var(--color-text-secondary);">234 kcal</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--color-text-primary);">Protein bar</span><span style="font-size:12px;color:var(--color-text-secondary);">216 kcal</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div onclick="switchTab('log',document.querySelectorAll('.nav-btn')[1])" style="background:var(--color-background-secondary);border-radius:12px;padding:11px 12px;margin-bottom:14px;cursor:pointer;border:.5px dashed var(--color-border-secondary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;border-radius:9px;background:var(--color-background-primary);border:.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-moon" style="font-size:15px;color:var(--color-text-tertiary);" aria-hidden="true"></i></div>
+              <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-secondary);">Dinner</p><p style="font-size:11px;color:var(--color-text-tertiary);margin:1px 0 0;">Not logged yet</p></div>
+            </div>
+            <div style="background:var(--color-background-info);border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:3px;">
+              <i class="ti ti-plus" style="font-size:12px;color:var(--color-text-info);" aria-hidden="true"></i>
+              <span style="font-size:11px;font-weight:500;color:var(--color-text-info);">Add</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- water tracker -->
+      <div style="margin:0 16px 14px;background:var(--color-background-secondary);border-radius:12px;padding:11px 13px;border:.5px solid var(--color-border-tertiary);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-droplet" style="font-size:15px;color:#378ADD;" aria-hidden="true"></i>
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Water</span>
+          </div>
+          <span style="font-size:12px;color:var(--color-text-secondary);"><span id="water-count">5</span> / 8 glasses</span>
+        </div>
+        <div id="water-drops" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- log food btn -->
+      <div style="padding:0 16px 22px;display:flex;justify-content:center;">
+        <button id="log-btn" onclick="switchTab('log',document.querySelectorAll('.nav-btn')[1])" style="background:#D85A30;color:white;border:none;border-radius:24px;padding:12px 32px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,opacity .15s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+          <i class="ti ti-plus" style="font-size:17px;" aria-hidden="true"></i>Log food
+        </button>
+      </div>
+    </div>
+
+    <!-- ====== LOG SCREEN ====== -->
+    <div id="s-log" style="display:none;">
+      <div style="padding:12px 16px 20px;">
+        <p style="font-size:18px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px;">Food log</p>
+
+        <div style="display:flex;align-items:center;gap:10px;background:var(--color-background-secondary);border-radius:12px;padding:10px 13px;border:.5px solid var(--color-border-tertiary);margin-bottom:14px;">
+          <i class="ti ti-search" style="font-size:16px;color:var(--color-text-tertiary);" aria-hidden="true"></i>
+          <span style="font-size:13px;color:var(--color-text-tertiary);flex:1;">Search foods or scan barcode...</span>
+          <i class="ti ti-barcode" style="font-size:18px;color:var(--color-text-secondary);" aria-hidden="true"></i>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:#FAEEDA;border-radius:12px;padding:11px 12px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><i class="ti ti-sun" style="font-size:13px;color:#BA7517;" aria-hidden="true"></i><span style="font-size:11px;color:#854F0B;font-weight:500;">Breakfast</span></div>
+            <p style="font-size:17px;font-weight:500;color:#412402;margin:0;">520 kcal</p>
+            <p style="font-size:10px;color:#854F0B;margin:2px 0 0;">P 18g · C 72g · F 14g</p>
+          </div>
+          <div style="background:#E1F5EE;border-radius:12px;padding:11px 12px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><i class="ti ti-salad" style="font-size:13px;color:#1D9E75;" aria-hidden="true"></i><span style="font-size:11px;color:#0F6E56;font-weight:500;">Lunch</span></div>
+            <p style="font-size:17px;font-weight:500;color:#085041;margin:0;">680 kcal</p>
+            <p style="font-size:10px;color:#0F6E56;margin:2px 0 0;">P 56g · C 74g · F 18g</p>
+          </div>
+          <div style="background:#EEEDFE;border-radius:12px;padding:11px 12px;border:.5px dashed #AFA9EC;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><i class="ti ti-moon" style="font-size:13px;color:#7F77DD;" aria-hidden="true"></i><span style="font-size:11px;color:#534AB7;font-weight:500;">Dinner</span></div>
+            <p style="font-size:14px;font-weight:500;color:#534AB7;margin:0;">Not logged</p>
+            <p style="font-size:10px;color:#7F77DD;margin:2px 0 0;">Tap to add dinner</p>
+          </div>
+          <div style="background:#FAECE7;border-radius:12px;padding:11px 12px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><i class="ti ti-apple" style="font-size:13px;color:#D85A30;" aria-hidden="true"></i><span style="font-size:11px;color:#993C1D;font-weight:500;">Snacks</span></div>
+            <p style="font-size:17px;font-weight:500;color:#4A1B0C;margin:0;">450 kcal</p>
+            <p style="font-size:10px;color:#993C1D;margin:2px 0 0;">P 16g · C 28g · F 20g</p>
+          </div>
+        </div>
+
+        <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;">Recent foods</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;border:.5px solid var(--color-border-tertiary);">
+            <i class="ti ti-clock" style="font-size:14px;color:var(--color-text-tertiary);flex-shrink:0;" aria-hidden="true"></i>
+            <div style="flex:1;"><p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0;">Oatmeal with banana</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0;">310 kcal · 45g C · 8g P · 5g F</p></div>
+            <i class="ti ti-plus" style="font-size:18px;color:var(--color-text-info);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;border:.5px solid var(--color-border-tertiary);">
+            <i class="ti ti-clock" style="font-size:14px;color:var(--color-text-tertiary);flex-shrink:0;" aria-hidden="true"></i>
+            <div style="flex:1;"><p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0;">Chicken breast (150g)</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0;">248 kcal · 0g C · 46g P · 3g F</p></div>
+            <i class="ti ti-plus" style="font-size:18px;color:var(--color-text-info);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;border:.5px solid var(--color-border-tertiary);">
+            <i class="ti ti-clock" style="font-size:14px;color:var(--color-text-tertiary);flex-shrink:0;" aria-hidden="true"></i>
+            <div style="flex:1;"><p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0;">Brown rice (100g)</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0;">215 kcal · 44g C · 5g P · 2g F</p></div>
+            <i class="ti ti-plus" style="font-size:18px;color:var(--color-text-info);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;border:.5px solid var(--color-border-tertiary);">
+            <i class="ti ti-clock" style="font-size:14px;color:var(--color-text-tertiary);flex-shrink:0;" aria-hidden="true"></i>
+            <div style="flex:1;"><p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0;">Greek yogurt</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0;">150 kcal · 8g C · 17g P · 3g F</p></div>
+            <i class="ti ti-plus" style="font-size:18px;color:var(--color-text-info);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;border:.5px solid var(--color-border-tertiary);">
+            <i class="ti ti-star" style="font-size:14px;color:#BA7517;flex-shrink:0;" aria-hidden="true"></i>
+            <div style="flex:1;"><p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin:0;">Almonds (40g)</p><p style="font-size:11px;color:var(--color-text-secondary);margin:0;">234 kcal · 5g C · 8g P · 20g F</p></div>
+            <i class="ti ti-plus" style="font-size:18px;color:var(--color-text-info);" aria-hidden="true"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PROGRESS SCREEN ====== -->
+    <div id="s-prog" style="display:none;">
+      <div style="padding:12px 16px 22px;">
+        <p style="font-size:18px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px;">Progress</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:#E1F5EE;border-radius:12px;padding:12px;">
+            <p style="font-size:11px;color:#0F6E56;margin:0 0 3px;font-weight:500;">Current weight</p>
+            <p style="font-size:22px;font-weight:500;color:#085041;margin:0;">72.4<span style="font-size:12px;font-weight:400;margin-left:2px;">kg</span></p>
+            <p style="font-size:11px;color:#1D9E75;margin:4px 0 0;">↓ 0.8kg this week</p>
+          </div>
+          <div style="background:#FAEEDA;border-radius:12px;padding:12px;">
+            <p style="font-size:11px;color:#854F0B;margin:0 0 3px;font-weight:500;">Avg daily intake</p>
+            <p style="font-size:22px;font-weight:500;color:#412402;margin:0;">1,890<span style="font-size:12px;font-weight:400;margin-left:2px;">kcal</span></p>
+            <p style="font-size:11px;color:#BA7517;margin:4px 0 0;">310 under goal</p>
+          </div>
+          <div style="background:#EEEDFE;border-radius:12px;padding:12px;">
+            <p style="font-size:11px;color:#534AB7;margin:0 0 3px;font-weight:500;">Logging streak</p>
+            <p style="font-size:22px;font-weight:500;color:#26215C;margin:0;">7<span style="font-size:12px;font-weight:400;margin-left:4px;">days</span></p>
+            <p style="font-size:11px;color:#7F77DD;margin:4px 0 0;">Personal best!</p>
+          </div>
+          <div style="background:#FAECE7;border-radius:12px;padding:12px;">
+            <p style="font-size:11px;color:#993C1D;margin:0 0 3px;font-weight:500;">BMI</p>
+            <p style="font-size:22px;font-weight:500;color:#4A1B0C;margin:0;">22.1<span style="font-size:12px;font-weight:400;margin-left:4px;">Normal</span></p>
+            <p style="font-size:11px;color:#D85A30;margin:4px 0 0;">Healthy range</p>
+          </div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:12px;padding:14px;border:.5px solid var(--color-border-tertiary);margin-bottom:12px;">
+          <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 10px;">This week</p>
+          <svg width="100%" viewBox="0 0 280 92" style="overflow:visible;">
+            <line x1="0" y1="25" x2="270" y2="25" stroke="#F5C4B3" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="244" y="22" fill="#D85A30" font-size="9" font-family="sans-serif">goal</text>
+            <rect x="5" y="40" width="27" height="52" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="44" y="29" width="27" height="63" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="83" y="46" width="27" height="46" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="122" y="34" width="27" height="58" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="161" y="31" width="27" height="61" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="200" y="52" width="27" height="40" rx="5" fill="#D85A30" opacity=".82"/>
+            <rect x="239" y="58" width="27" height="34" rx="5" fill="#1D9E75" opacity=".85"/>
+            <text x="18" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Mon</text>
+            <text x="57" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Tue</text>
+            <text x="96" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Wed</text>
+            <text x="135" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Thu</text>
+            <text x="174" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Fri</text>
+            <text x="213" y="89" text-anchor="middle" fill="#888780" font-size="9" font-family="sans-serif">Sat</text>
+            <text x="252" y="89" text-anchor="middle" fill="#1D9E75" font-size="9" font-weight="500" font-family="sans-serif">Sun</text>
+          </svg>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:12px;padding:14px;border:.5px solid var(--color-border-tertiary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+            <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0;">Weight log</p>
+            <button onclick="sendPrompt('Help me log my weight for today in my calorie tracker')" style="font-size:12px;color:var(--color-text-info);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:3px;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i>Log weight ↗</button>
+          </div>
+          <div style="border-top:.5px solid var(--color-border-tertiary);padding-top:2px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--color-border-tertiary);">
+              <span style="font-size:12px;color:var(--color-text-secondary);">Today</span>
+              <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:#1D9E75;">↓ 0.2</span><span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">72.4 kg</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--color-border-tertiary);">
+              <span style="font-size:12px;color:var(--color-text-secondary);">Yesterday</span>
+              <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:#1D9E75;">↓ 0.4</span><span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">72.6 kg</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--color-border-tertiary);">
+              <span style="font-size:12px;color:var(--color-text-secondary);">Jun 22</span>
+              <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">73.0 kg</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;">
+              <span style="font-size:12px;color:var(--color-text-secondary);">Jun 21</span>
+              <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">73.2 kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PROFILE SCREEN ====== -->
+    <div id="s-prof" style="display:none;">
+      <div style="padding:16px 16px 22px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px;background:var(--color-background-secondary);border-radius:14px;border:.5px solid var(--color-border-tertiary);">
+          <div style="width:52px;height:52px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:#085041;flex-shrink:0;">A</div>
+          <div>
+            <p style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin:0;">Alex Johnson</p>
+            <p style="font-size:12px;color:var(--color-text-secondary);margin:2px 0 0;">Goal: lose weight · Active</p>
+            <div style="display:flex;gap:6px;margin-top:5px;">
+              <span style="background:#FAEEDA;color:#412402;font-size:10px;font-weight:500;padding:2px 7px;border-radius:6px;">72.4 kg</span>
+              <span style="background:#E1F5EE;color:#085041;font-size:10px;font-weight:500;padding:2px 7px;border-radius:6px;">175 cm</span>
+              <span style="background:#EEEDFE;color:#26215C;font-size:10px;font-weight:500;padding:2px 7px;border-radius:6px;">28 yrs</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;">Goals</p>
+        <div style="background:var(--color-background-secondary);border-radius:12px;border:.5px solid var(--color-border-tertiary);overflow:hidden;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-flame" style="font-size:15px;color:#D85A30;" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Daily calories</span></div>
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">2,200 kcal</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-egg" style="font-size:15px;color:#1D9E75;" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Protein goal</span></div>
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">150g</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-bread" style="font-size:15px;color:#BA7517;" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Carbs goal</span></div>
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">250g</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-droplet" style="font-size:15px;color:#7F77DD;" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Fat goal</span></div>
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">65g</span>
+          </div>
+        </div>
+
+        <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;">Settings</p>
+        <div style="background:var(--color-background-secondary);border-radius:12px;border:.5px solid var(--color-border-tertiary);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-bell" style="font-size:15px;color:var(--color-text-secondary);" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Reminders</span></div>
+            <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-tertiary);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-download" style="font-size:15px;color:var(--color-text-secondary);" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Export data</span></div>
+            <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-tertiary);" aria-hidden="true"></i>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;">
+            <div style="display:flex;align-items:center;gap:9px;"><i class="ti ti-moon" style="font-size:15px;color:var(--color-text-secondary);" aria-hidden="true"></i><span style="font-size:13px;color:var(--color-text-primary);">Dark mode</span></div>
+            <div style="width:36px;height:20px;border-radius:10px;background:var(--color-background-tertiary);border:.5px solid var(--color-border-secondary);position:relative;cursor:pointer;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#D85A30;position:absolute;top:2px;left:18px;transition:left .2s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+
+  <!-- bottom nav -->
+  <nav style="display:flex;border-top:.5px solid var(--color-border-tertiary);padding:6px 0 12px;background:var(--color-background-primary);flex-shrink:0;">
+    <button class="nav-btn active" id="nb-dash" onclick="switchTab('dash',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;" aria-label="Home">
+      <i class="ti ti-home" style="font-size:21px;" aria-hidden="true"></i>
+      <span style="font-size:10px;font-weight:500;">Home</span>
+    </button>
+    <button class="nav-btn" id="nb-log" onclick="switchTab('log',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;" aria-label="Log food">
+      <i class="ti ti-pencil-plus" style="font-size:21px;" aria-hidden="true"></i>
+      <span style="font-size:10px;">Log</span>
+    </button>
+    <button class="nav-btn" id="nb-prog" onclick="switchTab('prog',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;" aria-label="Progress">
+      <i class="ti ti-chart-line" style="font-size:21px;" aria-hidden="true"></i>
+      <span style="font-size:10px;">Progress</span>
+    </button>
+    <button class="nav-btn" id="nb-prof" onclick="switchTab('prof',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;" aria-label="Profile">
+      <i class="ti ti-user" style="font-size:21px;" aria-hidden="true"></i>
+      <span style="font-size:10px;">Profile</span>
+    </button>
+  </nav>
+
+</div>
+</div>
+
+<script>
+var waterCount = 5;
+
+function switchTab(screen, btn) {
+  ['dash','log','prog','prof'].forEach(function(s) {
+    var el = document.getElementById('s-' + s);
+    if (el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(function(b) {
+    b.classList.remove('active');
+    b.style.color = 'var(--color-text-tertiary)';
+    var sp = b.querySelector('span');
+    if (sp) { sp.style.color = 'var(--color-text-tertiary)'; sp.style.fontWeight = '400'; }
+  });
+  var target = document.getElementById('s-' + screen);
+  if (target) {
+    target.style.display = 'block';
+    target.style.animation = 'none';
+    void target.offsetWidth;
+    target.style.animation = 'slideUp .25s ease forwards';
+  }
+  if (btn) {
+    btn.classList.add('active');
+    btn.style.color = '#D85A30';
+    var sp = btn.querySelector('span');
+    if (sp) { sp.style.color = '#D85A30'; sp.style.fontWeight = '500'; }
+  }
+  var c = document.getElementById('app-content');
+  if (c) c.scrollTop = 0;
+}
+
+function toggleMeal(card) {
+  var expandable = card.lastElementChild;
+  var chevron = card.firstElementChild.lastElementChild;
+  var isOpen = card.dataset.open === '1';
+  if (isOpen) {
+    expandable.style.maxHeight = '0';
+    chevron.style.transform = 'rotate(0deg)';
+    card.dataset.open = '0';
+  } else {
+    expandable.style.maxHeight = expandable.scrollHeight + 'px';
+    chevron.style.transform = 'rotate(180deg)';
+    card.dataset.open = '1';
+  }
+}
+
+function buildWater() {
+  var c = document.getElementById('water-drops');
+  if (!c) return;
+  c.innerHTML = '';
+  for (var i = 0; i < 8; i++) {
+    (function(idx) {
+      var d = document.createElement('div');
+      var filled = idx < waterCount;
+      d.style.cssText = 'width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .2s;background:' + (filled ? '#B5D4F4' : 'var(--color-background-primary)') + ';border:.5px solid ' + (filled ? '#85B7EB' : 'var(--color-border-secondary)') + ';';
+      d.innerHTML = '<i class="ti ti-droplet" style="font-size:14px;color:' + (filled ? '#185FA5' : 'var(--color-text-tertiary)') + ';" aria-hidden="true"></i>';
+      d.addEventListener('click', function() {
+        waterCount = (waterCount === idx + 1) ? idx : idx + 1;
+        buildWater();
+      });
+      d.addEventListener('mouseenter', function() { d.style.transform = 'scale(1.18)'; });
+      d.addEventListener('mouseleave', function() { d.style.transform = 'scale(1)'; });
+      c.appendChild(d);
+    })(i);
+  }
+  var wc = document.getElementById('water-count');
+  if (wc) wc.textContent = waterCount;
+}
+
+function countUp(id, target, duration, fmt) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var start = performance.now();
+  function tick(now) {
+    var p = Math.min((now - start) / duration, 1);
+    var ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(Math.round(target * ease));
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function animateRings() {
+  var data = [
+    {id:'r-cal', circ:502.65, pct:1650/2200},
+    {id:'r-pro', circ:395.84, pct:98/150},
+    {id:'r-car', circ:289.03, pct:180/250},
+    {id:'r-fat', circ:182.21, pct:45/65}
+  ];
+  data.forEach(function(r) {
+    var el = document.getElementById(r.id);
+    if (el) el.style.strokeDashoffset = (r.circ * (1 - Math.min(r.pct, 1))).toFixed(2);
+  });
+  countUp('c-cal', 1650, 1300, function(v) { return v.toLocaleString(); });
+  countUp('c-pro', 98, 1300, function(v) { return v + 'g'; });
+  countUp('c-car', 180, 1300, function(v) { return v + 'g'; });
+  countUp('c-fat', 45, 1300, function(v) { return v + 'g'; });
+  countUp('c-eaten', 1650, 1300, function(v) { return v.toLocaleString() + ' kcal'; });
+  var remain = document.getElementById('c-remain');
+  if (remain) {
+    var s2 = performance.now();
+    (function tick(now) {
+      var p = Math.min((now - s2) / 1300, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      remain.textContent = Math.round(2200 - 1650 * ease).toLocaleString() + ' kcal';
+      if (p < 1) requestAnimationFrame(tick);
+    })(s2);
+  }
+  setTimeout(function() {
+    var bar = document.getElementById('cal-bar');
+    if (bar) bar.style.width = Math.round(1650/2200*100) + '%';
+  }, 60);
+}
+
+setTimeout(function() {
+  buildWater();
+  animateRings();
+}, 120);
+</script>

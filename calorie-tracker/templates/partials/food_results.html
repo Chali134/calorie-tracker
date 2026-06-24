@@ -1,0 +1,51 @@
+{% if results %}
+{% if compact %}
+{# Card layout for the Log/Search tab — click to open modal #}
+<div class="flex flex-col gap-1.5 stagger-enter">
+    {% for food in results %}
+    <button type="button"
+        onclick="openAddModal(); selectFood('{{ food.name|replace("'", "\\'") }}', {{ food.calories }}, {{ food.protein }}, {{ food.carbs }}, {{ food.fat }}, {{ food.serving_size_g }}, '{{ food.serving_unit }}')"
+        class="search-card flex items-start gap-2 p-2.5 w-full text-left">
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 truncate">{{ food.name }}</span>
+                <span class="text-xs text-gray-500 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
+            </div>
+            <div class="text-[11px] text-gray-500 mt-0.5">
+                P {{ "%.0f"|format(food.protein) }}g · C {{ "%.0f"|format(food.carbs) }}g · F {{ "%.0f"|format(food.fat) }}g
+                <span class="ml-1 text-gray-600">/ {{ food.serving_unit }}</span>
+            </div>
+        </div>
+        <button onclick="event.stopPropagation(); toggleFav({{ food.id }}, this)"
+            class="shrink-0 text-gray-600 hover:text-[#F0B429] transition-colors text-sm px-1">
+            {% if food.id in fav_ids %}★{% else %}☆{% endif %}
+        </button>
+    </button>
+    {% endfor %}
+</div>
+{% else %}
+{# Dropdown list for the modal #}
+<div class="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] rounded-xl shadow-lg border border-[#2A2A2A] z-50 max-h-56 overflow-y-auto" id="food-results">
+    {% for food in results %}
+    <div class="flex items-center border-b border-[#1E1E1E] last:border-0">
+        <button type="button"
+            onclick="selectFood('{{ food.name|replace("'", "\\'") }}', {{ food.calories }}, {{ food.protein }}, {{ food.carbs }}, {{ food.fat }}, {{ food.serving_size_g }}, '{{ food.serving_unit }}')"
+            class="flex-1 text-left px-3.5 py-2.5 hover:bg-[#1F1F1F] transition-colors min-w-0">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 truncate">{{ food.name }}</span>
+                <span class="text-xs text-gray-500 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
+            </div>
+            <div class="text-[11px] text-gray-500 mt-0.5">
+                P {{ "%.0f"|format(food.protein) }}g · C {{ "%.0f"|format(food.carbs) }}g · F {{ "%.0f"|format(food.fat) }}g
+                <span class="ml-1 text-gray-600">/ {{ food.serving_unit }}</span>
+            </div>
+        </button>
+        <button onclick="toggleFav({{ food.id }}, this)"
+            class="px-3 py-3 text-gray-600 hover:text-[#F0B429] transition-colors shrink-0 text-sm">
+            {% if food.id in fav_ids %}★{% else %}☆{% endif %}
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endif %}

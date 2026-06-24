@@ -1,0 +1,144 @@
+{% set cal_pct = (total_calories / goals.calorie_target * 100) | round %}
+{% if cal_pct > 100 %}{% set cal_pct = 100 %}{% endif %}
+{% set pro_pct = (total_protein / goals.protein_target * 100) | round %}
+{% if pro_pct > 100 %}{% set pro_pct = 100 %}{% endif %}
+{% set carb_pct = (total_carbs / goals.carbs_target * 100) | round %}
+{% if carb_pct > 100 %}{% set carb_pct = 100 %}{% endif %}
+{% set fat_pct = (total_fat / goals.fat_target * 100) | round %}
+{% if fat_pct > 100 %}{% set fat_pct = 100 %}{% endif %}
+{% set remaining = [goals.calorie_target - total_calories, 0] | max %}
+
+<div class="px-4 pt-2 pb-1 flex justify-center">
+    <div class="ring-container">
+        <svg width="220" height="220" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" class="ring-bg" stroke-width="7"/>
+            <circle cx="50" cy="50" r="42" class="ring-fill"
+                stroke="url(#ringGrad)" stroke-width="7"
+                stroke-dasharray="263.89" stroke-dashoffset="{{ 263.89 - (263.89 * cal_pct / 100) }}"/>
+            <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FF6B3D"/>
+                    <stop offset="60%" stop-color="#F0B429"/>
+                    <stop offset="100%" stop-color="#2ECC71"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <div class="ring-center">
+            <span class="pct">{{ cal_pct | int }}%</span>
+            <span class="label">daily calories</span>
+            <span class="badge">{{ "Optimal" if cal_pct >= 80 and cal_pct <= 100 else "Building" if cal_pct < 80 else "Complete" }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="px-4 pb-2">
+    <div class="flex gap-2">
+        <div class="metric-card">
+            <div class="m-label">Calories</div>
+            <div class="m-value">{{ "%.0f"|format(total_calories) }}</div>
+            <div class="m-sub orange">{{ "%.0f"|format(goals.calorie_target) }} goal</div>
+        </div>
+        <div class="metric-card">
+            <div class="m-label">Protein</div>
+            <div class="m-value">{{ "%.0f"|format(total_protein) }}<span class="text-sm font-medium text-[#888]">g</span></div>
+            <div class="m-sub green">{{ "%.0f"|format(goals.protein_target) }}g goal</div>
+        </div>
+        <div class="metric-card">
+            <div class="m-label">Remaining</div>
+            <div class="m-value">{{ "%.0f"|format(remaining) }}</div>
+            <div class="m-sub orange">kcal left</div>
+        </div>
+    </div>
+</div>
+
+<div class="px-4 pb-2">
+    <div class="dark-card p-3.5">
+        <p class="text-[13px] font-semibold text-white mb-2.5">7 Days Progress</p>
+        <div class="flex items-end justify-between gap-1.5">
+            {% for i in range(7) %}
+            {% set day_cal = week_data[i] if week_data and i < week_data|length else 0 %}
+            {% set bar_pct = (day_cal / goals.calorie_target) if goals.calorie_target > 0 else 0 %}
+            {% set bar_h = [4, (bar_pct * 60)|round] | max %}
+            {% if bar_h > 60 %}{% set bar_h = 60 %}{% endif %}
+            {% set is_today = (i == 6) %}
+            {% set days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+            <div class="flex flex-col items-center gap-1 flex-1">
+                <div class="weekly-bar {% if is_today %}today{% endif %}" style="height:{{ bar_h }}px"></div>
+                <span class="weekly-label {% if is_today %}today{% endif %}">{{ days[i] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="px-4 pb-1 stagger-enter">
+    <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-2">Today's meals</p>
+    {% set categories = [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snacks")] %}
+    {% for key, label in categories %}
+    {% set cat_meals = meals | selectattr("meal_type", "equalto", key) | list %}
+    {% set cat_cal = cat_meals | sum(attribute="calories") %}
+    <div class="meal-row dark-card px-3.5 py-2.5 mb-1" onclick="toggleMealGroup(this)">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0
+                    {% if key == 'breakfast' %}" style="background:rgba(240,180,41,0.15)"
+                    {% elif key == 'lunch' %}" style="background:rgba(46,204,113,0.15)"
+                    {% elif key == 'dinner' %}" style="background:rgba(167,139,250,0.15)"
+                    {% else %}" style="background:rgba(255,107,61,0.15)"{% endif %}>
+                    {% if key == 'breakfast' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#F0B429" stroke="none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+                    {% elif key == 'lunch' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#2ECC71" stroke="none"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+                    {% elif key == 'dinner' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#A78BFA" stroke="none"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+                    {% else %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF6B3D" stroke="none"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0017 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 00-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/></svg>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ label }}</p>
+                    <p class="text-[11px] text-gray-500">{{ cat_meals|length }} item{% if cat_meals|length != 1 %}s{% endif %} &middot; {{ "%.0f"|format(cat_cal) }} kcal</p>
+                </div>
+            </div>
+            <svg class="chevron transition-transform duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="sub-items" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
+            <div class="mt-2 pt-2 border-t border-[#1E1E1E] space-y-1">
+                {% if cat_meals %}
+                {% for meal in cat_meals %}
+                <div class="flex items-center justify-between text-sm py-0.5">
+                    <span class="text-gray-700 text-[13px]">{{ meal.name }}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-500 text-xs tabular-nums">{{ "%.0f"|format(meal.calories) }} kcal</span>
+                        <button hx-delete="/meals/{{ meal.id }}" hx-target="#dashboard-content" hx-swap="innerHTML"
+                            class="text-gray-600 hover:text-[#FF6B3D] transition-colors p-0.5">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-xs text-gray-500 italic">No meals logged</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function toggleMealGroup(card) {
+    const sub = card.querySelector('.sub-items');
+    const chevron = card.querySelector('.chevron');
+    const isOpen = card.dataset.open === '1';
+    if (isOpen) {
+        sub.style.maxHeight = '0';
+        chevron.style.transform = 'rotate(0deg)';
+        card.dataset.open = '0';
+    } else {
+        sub.style.maxHeight = sub.scrollHeight + 'px';
+        chevron.style.transform = 'rotate(180deg)';
+        card.dataset.open = '1';
+    }
+}
+</script>

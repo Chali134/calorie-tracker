@@ -1,0 +1,18 @@
+{% for r in reminders %}
+<form hx-post="/reminders/{{ r.id }}" hx-target="#reminders-body" hx-swap="innerHTML" class="flex items-center gap-3 px-4 py-3 border-b border-[#1E1E1E] last:border-0">
+    <span class="text-base shrink-0">{{ r.label.split(" ")[0] }}</span>
+    <div class="flex-1 min-w-0">
+        <p class="text-sm text-gray-700">{{ r.label.split(" ", 1)[1] if " " in r.label else r.label }}</p>
+    </div>
+    <input type="time" name="time" value="{{ r.time }}"
+        onchange="this.closest('form').querySelector('.save-trigger').click()"
+        class="text-xs text-gray-500 bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg px-2 py-1.5 w-20 tabular-nums">
+    <label class="toggle">
+        <input type="hidden" name="enabled" value="0">
+        <input type="checkbox" name="enabled" value="1" {{ 'checked' if r.enabled else '' }}
+            onchange="this.closest('form').querySelector('.save-trigger').click()">
+        <span class="toggle-slider"></span>
+    </label>
+    <button type="submit" class="save-trigger" style="display:none"></button>
+</form>
+{% endfor %}
