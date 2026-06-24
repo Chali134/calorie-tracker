@@ -10,9 +10,12 @@
         <div id="tab-home" class="tab-content active">
             <!-- Header: greeting + date + avatar -->
             <div class="flex items-center justify-between px-5 pt-4 pb-0.5">
-                <div>
-                    <p class="text-xs text-gray-500 tracking-wide">Good morning</p>
-                    <p class="text-[26px] font-bold text-white leading-tight" id="today-date"></p>
+                <div class="flex items-center gap-3">
+                    <img src="/static/logo.svg" alt="CalTrack" class="w-9 h-9 shrink-0 border-2 border-[#D85A30]">
+                    <div>
+                        <p class="text-xs text-gray-500 tracking-wide">Good morning</p>
+                        <p class="text-[26px] font-bold text-white leading-tight" id="today-date"></p>
+                    </div>
                 </div>
                 <div onclick="switchTab('profile', document.querySelector('[data-tab=profile]'))"
                     class="w-10 h-10 shrink-0 cursor-pointer transition-opacity overflow-hidden border-2 border-[#2A2A2A] hover:opacity-80"
