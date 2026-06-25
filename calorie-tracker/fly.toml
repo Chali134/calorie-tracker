@@ -14,7 +14,7 @@ primary_region = "iad"
     port = 80
     handlers = ["http"]
 
-  [[services.concurrency]]
+  [services.concurrency]
     type = "requests"
     hard_limit = 250
     soft_limit = 200
