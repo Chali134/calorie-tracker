@@ -50,7 +50,7 @@
                 <div class="flex items-center gap-3">
                     <img src="/static/logo.svg" alt="CalTrack" class="w-9 h-9 shrink-0 border-2 border-[#D85A30]">
                     <div>
-                        <p class="text-xs text-gray-500 tracking-wide">Good morning</p>
+                        <p class="text-xs text-gray-400 tracking-wide">Good morning</p>
                         <p class="text-[26px] font-bold text-white leading-tight" id="today-date"></p>
                     </div>
                 </div>
@@ -72,15 +72,20 @@
             </div>
 
             <!-- Water tracker -->
-            <div class="mx-4 mb-3 dark-card px-4 py-3.5">
-                <div class="flex items-center justify-between mb-2.5">
-                    <div class="flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#4A9EFF" stroke="none"><path d="M12 2C12 2 6 10 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-5-6-13-6-13z"/></svg>
-                        <span class="text-sm font-bold text-white">WATER</span>
+            <div class="px-4 pb-3">
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Water</p>
+                <div class="dark-card px-5 py-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 flex items-center justify-center border-2 border-[#4A9EFF] bg-[#0A0A0A]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2.5"><path d="M12 2C12 2 6 10 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-5-6-13-6-13z"/></svg>
+                            </div>
+                            <span class="text-base font-bold text-white">Intake</span>
+                        </div>
+                        <span class="text-sm font-bold text-gray-400"><span id="water-count">0</span> / 8 glasses</span>
                     </div>
-                    <span class="text-xs font-bold text-[#555]"><span id="water-count">0</span> / 8 glasses</span>
+                    <div id="water-drops" class="flex gap-2 flex-wrap"></div>
                 </div>
-                <div id="water-drops" class="flex gap-1.5 flex-wrap"></div>
             </div>
 
         </div>
@@ -122,7 +127,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-lg font-black text-white">{{ user.username }}</p>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-0.5">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-0.5">
                                 {% if profile %}
                                 {{ profile.goal_type|replace("_", " ") | capitalize }} &middot; {{ profile.activity_level|replace("_", " ") | capitalize }}
                                 {% else %}
@@ -153,24 +158,24 @@
                 <div class="grid grid-cols-4 gap-2 mb-4">
                     <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ total_meals }}</p>
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Meals</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Meals</p>
                     </div>
                     <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ "%.0f"|format(calories_burned) }}</p>
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Burned</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Burned</p>
                     </div>
                     <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ today_workouts|length }}</p>
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Exercises</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Exercises</p>
                     </div>
                     <div class="profile-stat dark-card p-2.5 text-center">
                         <p class="text-lg font-black text-white">{{ streak }}</p>
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Streak</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Streak</p>
                     </div>
                 </div>
 
                 <!-- Macro goals with today's progress -->
-                <p class="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">Today's Macros</p>
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Today's Macros</p>
                 <div class="dark-card p-3.5 mb-4">
                     {% set macro_targets = [
                         ("Calories", total_calories, goals.calorie_target, "#FF6B3D"),
@@ -184,7 +189,7 @@
                     <div class="mb-2.5 last:mb-0">
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-xs font-bold text-white">{{ label }}</span>
-                            <span class="text-xs font-bold text-gray-500 tabular-nums">{{ "%.0f"|format(current) }} / {{ "%.0f"|format(target) }} <span class="text-[9px]">
+                            <span class="text-xs font-bold text-gray-400 tabular-nums">{{ "%.0f"|format(current) }} / {{ "%.0f"|format(target) }} <span class="text-[9px]">
                                 {% if label == "Calories" %}kcal{% else %}g{% endif %}</span></span>
                         </div>
                         <div class="macro-bar-track h-2.5">
@@ -195,7 +200,7 @@
                 </div>
 
                 <!-- Workout Notes / Planner -->
-                <p class="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">Workout Planner</p>
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Workout Planner</p>
                 <div class="dark-card p-3.5 mb-4">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-bold text-white">Notes for today</p>
@@ -208,7 +213,7 @@
                 </div>
 
                 <!-- Settings -->
-                <p class="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">Settings</p>
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Settings</p>
                 <div class="dark-card overflow-hidden">
                     <div onclick="openRemindersModal()" class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
                         <div class="flex items-center gap-3">
@@ -242,7 +247,7 @@
                         <span class="text-xs font-bold uppercase tracking-wider">Follow @theodoesgame</span>
                     </a>
                     <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">
-                        Built by <span class="text-gray-500">Theo</span>
+                        Built by <span class="text-gray-400">Theo</span>
                     </p>
                     <p class="text-[9px] text-gray-600 mt-1">
                         &copy; 2026 CalTrack &mdash; Free for everyone. No ads, no tracking, no paywalls.
@@ -286,7 +291,7 @@
     <div class="relative bg-[#0A0A0A] max-w-md w-full max-h-[80vh] overflow-y-auto border-2 border-[#2A2A2A] border-b-0 animate-slide-up">
         <div class="flex items-center justify-between px-5 pt-5 pb-3 sticky top-0 bg-[#0A0A0A] z-10 border-b-2 border-[#2A2A2A]">
             <h2 class="text-base font-black text-white uppercase tracking-wider">Reminders</h2>
-            <button onclick="closeRemindersModal()" class="text-gray-500 hover:text-white transition-colors p-1">
+            <button onclick="closeRemindersModal()" class="text-gray-400 hover:text-white transition-colors p-1">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -294,7 +299,7 @@
             {% include "partials/reminders_list.html" %}
         </div>
         <div class="px-5 py-3 border-t-2 border-[#2A2A2A] bg-[#0A0A0A]">
-            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">
+            <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                 Reminders fire when this tab is open. Grant notification permission in your browser to get desktop alerts.
             </p>
         </div>
@@ -371,16 +376,16 @@ setTimeout(checkReminders, 2000);
     <div class="relative bg-[#141414]  w-full max-w-md p-5 pb-8 animate-slide-up max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-base font-semibold text-white">Log meal</h2>
-            <button onclick="closeAddModal()" class="text-gray-500 hover:text-gray-400 transition-colors p-1">
+            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-400 transition-colors p-1">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
 
         <div class="relative mb-3">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Food</label>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Food</label>
             <input type="text" id="food-search" placeholder="Search or type a food..."
                 autocomplete="off"
-                class="w-full px-3.5 py-2.5 dark-card  text-sm placeholder:text-gray-500 focus:outline-none focus:border-[#FF6B3D] transition-colors"
+                class="w-full px-3.5 py-2.5 dark-card  text-sm placeholder:text-gray-400 focus:outline-none focus:border-[#FF6B3D] transition-colors"
                 oninput="document.getElementById('f-name').value = this.value">
             <div id="food-results-container" class="relative"></div>
         </div>
@@ -389,7 +394,7 @@ setTimeout(checkReminders, 2000);
             <input type="hidden" name="name" id="f-name">
 
             <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1.5">Meal</label>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Meal</label>
                 <div class="grid grid-cols-4 gap-1.5" id="meal-type-select">
                     {% for mt in [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snack")] %}
                     <label class="opt-btn flex items-center justify-center px-2 py-2 dark-card  cursor-pointer text-xs font-medium">
@@ -402,45 +407,45 @@ setTimeout(checkReminders, 2000);
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Servings</label>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Servings</label>
                 <div class="flex gap-2 items-center">
                     <input type="number" name="servings" id="f-servings" value="1" min="0.25" max="100" step="0.25"
                         class="w-16 px-2 py-2 dark-card  text-sm tabular-nums text-center"
                         oninput="updateMacroPreview()">
-                    <span class="text-xs text-gray-500" id="serving-unit-display">serving(s)</span>
+                    <span class="text-xs text-gray-400" id="serving-unit-display">serving(s)</span>
                 </div>
                 <div class="flex gap-1.5 mt-1.5 flex-wrap" id="serving-size-options">
-                    <button type="button" onclick="setServing('g (100g)', 100)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-500 hover:border-[#FF6B3D] transition-colors">100g</button>
-                    <button type="button" onclick="setServing('cup (240ml)', 240)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-500 hover:border-[#FF6B3D] transition-colors">1 cup</button>
-                    <button type="button" onclick="setServing('piece', 0)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-500 hover:border-[#FF6B3D] transition-colors">1 piece</button>
-                    <button type="button" onclick="setServing('tbsp (15ml)', 15)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-500 hover:border-[#FF6B3D] transition-colors">1 tbsp</button>
+                    <button type="button" onclick="setServing('g (100g)', 100)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">100g</button>
+                    <button type="button" onclick="setServing('cup (240ml)', 240)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 cup</button>
+                    <button type="button" onclick="setServing('piece', 0)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 piece</button>
+                    <button type="button" onclick="setServing('tbsp (15ml)', 15)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 tbsp</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-4 gap-1.5">
                 <div>
-                    <label class="block text-[10px] font-medium text-gray-500 mb-0.5">Cal</label>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Cal</label>
                     <input type="number" name="calories" id="f-calories" step="0.1" min="0" value="0" required
                         class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-medium text-gray-500 mb-0.5">Protein</label>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Protein</label>
                     <input type="number" name="protein" id="f-protein" step="0.1" min="0" value="0"
                         class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-medium text-gray-500 mb-0.5">Carbs</label>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Carbs</label>
                     <input type="number" name="carbs" id="f-carbs" step="0.1" min="0" value="0"
                         class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-medium text-gray-500 mb-0.5">Fat</label>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Fat</label>
                     <input type="number" name="fat" id="f-fat" step="0.1" min="0" value="0"
                         class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
                 </div>
             </div>
 
-            <div class="text-[11px] text-gray-500 text-center" id="macro-preview"></div>
+            <div class="text-[11px] text-gray-400 text-center" id="macro-preview"></div>
 
             <button type="submit" class="w-full py-3 bg-[#FF6B3D] hover:bg-[#D85A30] text-white  font-medium text-sm active:scale-[0.98] transition-all duration-200">
                 Log Meal
@@ -617,3 +622,4 @@ function loadNote(dateStr) {
 </script>
 </div>
 {% endblock %}
+

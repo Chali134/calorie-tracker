@@ -5,7 +5,7 @@
         <div class="text-center mb-8">
             <img src="/static/logo.svg" alt="CalTrack" class="w-16 h-16 mx-auto mb-4 border-2 border-[#D85A30]">
             <h1 class="text-2xl font-bold text-white">Welcome back</h1>
-            <p class="text-sm text-gray-500 mt-1">Sign in to track your meals</p>
+            <p class="text-sm text-gray-400 mt-1">Sign in to track your meals</p>
         </div>
 
         <form method="post" action="/login" class="space-y-4">
@@ -14,12 +14,12 @@
             {% endif %}
 
             <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1.5">Username</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Username</label>
                 <input type="text" name="username" required autocomplete="username"
                     class="form-input w-full px-4 py-3">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1.5">Password</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Password</label>
                 <input type="password" name="password" required autocomplete="current-password"
                     class="form-input w-full px-4 py-3">
             </div>
@@ -30,10 +30,11 @@
             </button>
         </form>
 
-        <p class="text-center text-sm text-gray-500 mt-6">
+        <p class="text-center text-sm text-gray-400 mt-6">
             Don't have an account?
             <a href="/signup" class="text-[#FF6B3D] font-medium hover:underline underline-offset-2">Sign up</a>
         </p>
     </div>
 </div>
 {% endblock %}
+

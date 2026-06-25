@@ -1,14 +1,14 @@
 # CalTrack — Brutalist Calorie & Workout Tracker
 
-A **Progressive Web App** for tracking daily calories, macronutrients, and workouts — built with **FastAPI**, **HTMX**, and **Tailwind CSS**. Features a distinctive **New Brutalism** design: pure black background, sharp corners, flat orange accent, zero gradients or shadows.
+A **Progressive Web App** for tracking daily calories, macronutrients, and workouts — built with **FastAPI**, **HTMX**, and **Tailwind CSS**. Features a distinctive **New Brutalism** design: pure black background, sharp corners, flat orange accent, zero gradients, shadows, or border-radius.
 
 ## Features
 
 ### 🍽️ Meal Tracking
-- **Dashboard** — animated SVG ring showing eaten % of daily goal, macronutrient breakdown (protein/carbs/fat), 7-day intake bar chart
+- **Dashboard** — brutalist progress block showing eaten calories vs goal (large typography, solid progress bar), macronutrient breakdown (protein/carbs/fat), 7-day intake bar chart
 - **Bottom-sheet modal** — searchable 100+ food database with serving sizes, meal types (breakfast/lunch/dinner/snack)
 - **Favourites & Recent** — star foods for quick access, recently-used foods shown first
-- **Meal accordion** — meals grouped by type, expand/collapse with animated chevron
+- **Meal accordion** — meals grouped by type within a single dark card, expand/collapse with animated chevron
 
 ### 🏋️ Exercise Tracking
 - **100 exercises** across 7 muscle groups (Chest, Back, Legs, Shoulders, Arms, Core, Cardio)
@@ -51,7 +51,7 @@ A **Progressive Web App** for tracking daily calories, macronutrients, and worko
 - Offline-capable service worker
 - iOS `viewport-fit=cover` notch support
 - Portrait orientation lock
-- Dark theme (`#080808` background)
+- Dark theme (`#0A0A0A` background)
 
 ## Quick Start
 
@@ -120,7 +120,7 @@ Browser → HTMX → FastAPI route → database.py (async SQLite) → Jinja2 par
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | Main SPA shell (`index.html`) with all tab data |
-| GET | `/meals` | HTMX partial: today's meals dashboard |
+| GET | `/meals` | HTMX partial: today's meals dashboard (supports `date` param) |
 | POST | `/meals` | Add a meal (`name`, `calories`, `protein`, `carbs`, `fat`, `meal_type`, `servings`) |
 | DELETE | `/meals/{id}` | Delete a meal |
 
@@ -133,8 +133,8 @@ Browser → HTMX → FastAPI route → database.py (async SQLite) → Jinja2 par
 ### Exercise / Workouts
 | Method | Path | Description |
 |---|---|---|
-| GET | `/training` | HTMX partial: exercise browser + today's workouts |
-| POST | `/workouts` | Log workout (`exercise_id`, `sets`, `reps`, `weight_kg`) |
+| GET | `/training` | HTMX partial: exercise browser + today's workouts (supports `date` param) |
+| POST | `/workouts` | Log workout (`exercise_id`, `sets`, `reps`, `weight_kg`, supports `date` param) |
 | DELETE | `/workouts/{id}` | Remove a workout |
 | POST | `/workouts/{id}/complete` | Toggle completion |
 
@@ -207,13 +207,14 @@ calorie-tracker/
 │   ├── signup.html          # Registration form
 │   ├── onboarding.html      # Profile setup with TDEE (age/gender/height/weight/activity/goal)
 │   └── partials/
-│       ├── dashboard_content.html   # Daily ring, 3 metric cards, week chart, meal accordion
+│       ├── dashboard_content.html   # Progress block, stat row, week chart, meal accordion
 │       ├── activity_content.html    # Date picker, day detail, stats, intake + burned charts
 │       ├── training_content.html    # Muscle filter, exercise grid, workout accordion
 │       ├── day_detail.html          # Meals + workouts for a specific date
 │       ├── food_results.html        # Food search results (compact card / dropdown)
 │       ├── reminders_list.html      # Reminder rows with time picker + toggle
-│       └── note_input.html          # Workout planner textarea + save
+│       ├── note_input.html          # Workout planner textarea + save
+│       └── activity_charts.html     # 7-day intake + burned bar charts (HTMX-swappable)
 │
 └── static/
     ├── css/
@@ -230,12 +231,12 @@ calorie-tracker/
 ### New Brutalism — Rules
 | Property | Value |
 |---|---|
-| Background | `#080808` (page), `#1A1A1A` (cards) |
+| Background | `#0A0A0A` (page), `#1A1A1A` (cards) |
 | Borders | `2px solid #2A2A2A`, **zero** border-radius |
 | Accent | `#FF6B3D` (flat orange, no gradient) |
 | Shadows | **None** — flat design |
 | Blur/Glass | **None** — no backdrop-filter |
-| Border radius | **Zero** everywhere |
+| Border-radius | **Zero** everywhere |
 
 ### Color Palette
 ```
@@ -248,9 +249,9 @@ Gray:    50→900 (#141414 → #F5F5F5)
 ```
 
 ### Typography
-- **Font**: Urbanist (sans-serif, 300–800 weight)
-- **Scale**: `[9px]` labels → `[26px]` headings → `56px` ring percentage
-- **Style**: Uppercase tracking-wider labels, font-black for emphasis
+- **Font**: Urbanist (sans-serif, 300–900 weight)
+- **Scale**: `[13px]` labels → `[26px]` headings → `60px` intake display
+- **Style**: Uppercase tracking-wider labels, font-black for emphasis, text-gray-400 for secondary text (improved contrast over gray-500)
 
 ### Bottom Navigation
 - **Fixed** at bottom center (88% width, max 360px, `margin: 0 auto`)
@@ -309,6 +310,8 @@ pip install -r requirements.txt
 
 # Run with hot reload
 python -m uvicorn main:app --reload --port 8000
+# Or without async:
+python main.py
 
 # Delete database to reset (will be recreated with seed data)
 del calories.db

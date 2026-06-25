@@ -9,9 +9,9 @@
         <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 truncate">{{ food.name }}</span>
-                <span class="text-xs text-gray-500 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
+                <span class="text-xs text-gray-400 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
             </div>
-            <div class="text-[11px] text-gray-500 mt-0.5">
+            <div class="text-[11px] text-gray-400 mt-0.5">
                 P {{ "%.0f"|format(food.protein) }}g · C {{ "%.0f"|format(food.carbs) }}g · F {{ "%.0f"|format(food.fat) }}g
                 <span class="ml-1 text-gray-600">/ {{ food.serving_unit }}</span>
             </div>
@@ -33,9 +33,9 @@
             class="flex-1 text-left px-3.5 py-2.5 hover:bg-[#1F1F1F] transition-colors min-w-0">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 truncate">{{ food.name }}</span>
-                <span class="text-xs text-gray-500 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
+                <span class="text-xs text-gray-400 tabular-nums ml-2 shrink-0">{{ "%.0f"|format(food.calories) }} kcal</span>
             </div>
-            <div class="text-[11px] text-gray-500 mt-0.5">
+            <div class="text-[11px] text-gray-400 mt-0.5">
                 P {{ "%.0f"|format(food.protein) }}g · C {{ "%.0f"|format(food.carbs) }}g · F {{ "%.0f"|format(food.fat) }}g
                 <span class="ml-1 text-gray-600">/ {{ food.serving_unit }}</span>
             </div>
@@ -49,3 +49,4 @@
 </div>
 {% endif %}
 {% endif %}
+

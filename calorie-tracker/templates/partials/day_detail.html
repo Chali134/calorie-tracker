@@ -2,47 +2,47 @@
     {% set net_remaining = goals.calorie_target - total_calories + calories_burned %}
     <div class="grid grid-cols-3 gap-2 mb-3">
         <div class="p-2.5 dark-card text-center">
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Eaten</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Eaten</p>
             <p class="text-lg font-black text-white tabular-nums">{{ "%.0f"|format(total_calories) }}</p>
         </div>
         <div class="p-2.5 dark-card text-center">
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Burned</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Burned</p>
             <p class="text-lg font-black text-white tabular-nums">{{ "%.0f"|format(calories_burned) }}</p>
         </div>
         <div class="p-2.5 dark-card text-center">
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Net</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Net</p>
             <p class="text-lg font-black text-white tabular-nums">{{ "%.0f"|format([net_remaining, 0]|max) }}</p>
         </div>
     </div>
 
     <div class="dark-card p-3 mb-3">
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Meals</p>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Meals</p>
         {% if meals %}
         {% for meal in meals %}
         <div class="flex items-center justify-between py-1.5 border-b border-[#1E1E1E] last:border-0">
             <span class="text-sm text-white">{{ meal.name }}</span>
-            <span class="text-xs text-gray-500">{{ "%.0f"|format(meal.calories) }} kcal</span>
+            <span class="text-xs text-gray-400">{{ "%.0f"|format(meal.calories) }} kcal</span>
         </div>
         {% endfor %}
         {% else %}
-        <p class="text-xs text-gray-500 italic">No meals logged</p>
+        <p class="text-xs text-gray-400 italic">No meals logged</p>
         {% endif %}
     </div>
 
     <div class="dark-card p-3">
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Workouts</p>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Workouts</p>
         {% if workouts %}
         {% for w in workouts %}
         <div class="flex items-center justify-between py-1.5 border-b border-[#1E1E1E] last:border-0">
             <div>
                 <span class="text-sm text-white">{{ w.exercise_name }}</span>
-                <span class="text-xs text-gray-500 ml-2">{{ w.sets }}×{{ w.reps }}{% if w.weight_kg > 0 %} @ {{ "%.0f"|format(w.weight_kg) }} kg{% endif %}</span>
+                <span class="text-xs text-gray-400 ml-2">{{ w.sets }}×{{ w.reps }}{% if w.weight_kg > 0 %} @ {{ "%.0f"|format(w.weight_kg) }} kg{% endif %}</span>
             </div>
-            <span class="text-xs text-gray-500">{{ (w.calories_per_hour / 30 * w.sets)|round|int }} kcal</span>
+            <span class="text-xs text-gray-400">{{ (w.calories_per_hour / 30 * w.sets)|round|int }} kcal</span>
         </div>
         {% endfor %}
         {% else %}
-        <p class="text-xs text-gray-500 italic">No workouts logged</p>
+        <p class="text-xs text-gray-400 italic">No workouts logged</p>
         {% endif %}
     </div>
 </div>

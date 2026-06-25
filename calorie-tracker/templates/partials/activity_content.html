@@ -4,14 +4,14 @@
     <!-- Date picker -->
     <div class="dark-card p-3 mb-3">
         <div class="flex items-center justify-between">
-            <button onclick="changeDay(-1)" class="px-3 py-1.5 border-2 border-[#2A2A2A] text-gray-500 hover:text-white hover:border-[#444] text-xs font-bold transition-colors">&larr;</button>
+            <button onclick="changeDay(-1)" class="px-3 py-1.5 border-2 border-[#2A2A2A] text-gray-400 hover:text-white hover:border-[#444] text-xs font-bold transition-colors">&larr;</button>
             <div class="flex items-center gap-2">
                 <input type="date" id="day-picker" value="{{ selected_date }}" max="{{ today_iso }}"
                     onchange="goToDate(this.value)"
                     class="bg-transparent border-2 border-[#2A2A2A] px-2 py-1.5 text-white text-xs font-bold text-center"
                     style="color-scheme:dark">
             </div>
-            <button onclick="changeDay(1)" class="px-3 py-1.5 border-2 border-[#2A2A2A] text-gray-500 hover:text-white hover:border-[#444] text-xs font-bold transition-colors">&rarr;</button>
+            <button onclick="changeDay(1)" class="px-3 py-1.5 border-2 border-[#2A2A2A] text-gray-400 hover:text-white hover:border-[#444] text-xs font-bold transition-colors">&rarr;</button>
         </div>
     </div>
 
@@ -23,24 +23,24 @@
     <!-- Stats grid -->
     <div class="grid grid-cols-2 gap-2.5 mb-4 mt-4">
         <div class="p-3 dark-card">
-            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Weight</p>
-            <p class="text-xl font-black text-white tabular-nums">{{ "%.1f"|format(profile.weight) if profile else 70 }}<span class="text-xs font-normal text-gray-500 ml-0.5">kg</span></p>
-            <p class="text-[11px] text-gray-500 mt-1">Tracking since day 1</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Weight</p>
+            <p class="text-xl font-black text-white tabular-nums">{{ "%.1f"|format(profile.weight) if profile else 70 }}<span class="text-xs font-normal text-gray-400 ml-0.5">kg</span></p>
+            <p class="text-[11px] text-gray-400 mt-1">Tracking since day 1</p>
         </div>
         <div class="p-3 dark-card">
-            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Avg Intake</p>
-            <p class="text-xl font-black text-white tabular-nums">{{ "%.0f"|format(avg_calories) }}<span class="text-xs font-normal text-gray-500 ml-0.5">kcal</span></p>
-            <p class="text-[11px] text-gray-500 mt-1">{{ "%.0f"|format(goals.calorie_target - avg_calories) if avg_calories > 0 else 0 }} under goal</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Avg Intake</p>
+            <p class="text-xl font-black text-white tabular-nums">{{ "%.0f"|format(avg_calories) }}<span class="text-xs font-normal text-gray-400 ml-0.5">kcal</span></p>
+            <p class="text-[11px] text-gray-400 mt-1">{{ "%.0f"|format(goals.calorie_target - avg_calories) if avg_calories > 0 else 0 }} under goal</p>
         </div>
         <div class="p-3 dark-card">
-            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Meal Streak</p>
-            <p class="text-xl font-black text-white tabular-nums">{{ streak }}<span class="text-xs font-normal text-gray-500 ml-1">days</span></p>
-            <p class="text-[11px] text-gray-500 mt-1">{% if streak > 0 %}Keep it up!{% else %}Start today{% endif %}</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Meal Streak</p>
+            <p class="text-xl font-black text-white tabular-nums">{{ streak }}<span class="text-xs font-normal text-gray-400 ml-1">days</span></p>
+            <p class="text-[11px] text-gray-400 mt-1">{% if streak > 0 %}Keep it up!{% else %}Start today{% endif %}</p>
         </div>
         <div class="p-3 dark-card">
-            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">BMI</p>
-            <p class="text-xl font-black text-white tabular-nums">{{ "%.1f"|format(bmi) }}<span class="text-xs font-normal text-gray-500 ml-1">{{ bmi_label }}</span></p>
-            <p class="text-[11px] text-gray-500 mt-1">{{ bmi_desc }}</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">BMI</p>
+            <p class="text-xl font-black text-white tabular-nums">{{ "%.1f"|format(bmi) }}<span class="text-xs font-normal text-gray-400 ml-1">{{ bmi_label }}</span></p>
+            <p class="text-[11px] text-gray-400 mt-1">{{ bmi_desc }}</p>
         </div>
     </div>
 
@@ -56,11 +56,11 @@
         </div>
         <div>
             <div class="flex items-center justify-between py-2 border-b border-[#1E1E1E]">
-                <span class="text-xs text-gray-500">Today</span>
+                <span class="text-xs text-gray-400">Today</span>
                 <span class="text-sm font-bold text-white tabular-nums">{{ "%.1f"|format(profile.weight) if profile else "—" }} kg</span>
             </div>
             <div class="flex items-center justify-between py-2">
-                <span class="text-xs text-gray-500">Target</span>
+                <span class="text-xs text-gray-400">Target</span>
                 <span class="text-sm font-bold text-white tabular-nums">—</span>
             </div>
         </div>

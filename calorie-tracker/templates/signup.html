@@ -5,7 +5,7 @@
         <div class="text-center mb-8">
             <img src="/static/logo.svg" alt="CalTrack" class="w-16 h-16 mx-auto mb-4 border-2 border-[#D85A30]">
             <h1 class="text-2xl font-bold text-white">Create Account</h1>
-            <p class="text-sm text-gray-500 mt-1">Start tracking your calories</p>
+            <p class="text-sm text-gray-400 mt-1">Start tracking your calories</p>
         </div>
 
         <form method="post" action="/signup" class="space-y-4">
@@ -14,16 +14,16 @@
             {% endif %}
 
             <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1.5">Username</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Username</label>
                 <input type="text" name="username" required minlength="3" autocomplete="username"
                     class="form-input w-full px-4 py-3">
-                <p class="text-xs text-gray-500 mt-1">At least 3 characters</p>
+                <p class="text-xs text-gray-400 mt-1">At least 3 characters</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1.5">Password</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Password</label>
                 <input type="password" name="password" required minlength="6" autocomplete="new-password"
                     class="form-input w-full px-4 py-3">
-                <p class="text-xs text-gray-500 mt-1">At least 6 characters</p>
+                <p class="text-xs text-gray-400 mt-1">At least 6 characters</p>
             </div>
 
             <button type="submit"
@@ -32,10 +32,11 @@
             </button>
         </form>
 
-        <p class="text-center text-sm text-gray-500 mt-6">
+        <p class="text-center text-sm text-gray-400 mt-6">
             Already have an account?
             <a href="/login" class="text-[#2ECC71] font-medium hover:underline underline-offset-2">Sign in</a>
         </p>
     </div>
 </div>
 {% endblock %}
+
