@@ -1,9 +1,9 @@
-import secrets
+import os, secrets
 from datetime import date, timedelta, datetime
 import aiosqlite
 from passlib.hash import bcrypt
 
-DB_PATH = "calories.db"
+DB_PATH = os.environ.get("DB_PATH", "calories.db")
 
 FOODS_SEED = [
     ("Apple", 95, 0.5, 25, 0.3, 182, "piece"),
