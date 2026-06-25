@@ -1,8 +1,9 @@
-*.db
 __pycache__/
-*.py[cod]
-venv/
-.venv/
+*.pyc
+calories.db
+static/uploads/*.jpg
+static/uploads/*.png
 .env
-static/uploads/*
-!static/uploads/.gitkeep
+*.egg-info/
+dist/
+build/

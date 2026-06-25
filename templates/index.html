@@ -1,101 +1,495 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-lg mx-auto px-5 pt-7 pb-24 min-h-screen flex flex-col">
-    <!-- Dashboard (updates on add/delete) -->
-    <div id="dashboard-content">
-        {% include "partials/dashboard_content.html" %}
+<div class="app-layout">
+
+    <!-- Desktop Sidebar Navigation -->
+    <nav class="sidebar-nav">
+        <div class="sidebar-header">
+            <img src="/static/logo.svg" alt="CalTrack" class="w-9 h-9 border-2 border-[#D85A30] shrink-0">
+            <span class="sidebar-brand">CalTrack</span>
+        </div>
+        <div class="sidebar-items">
+            <button class="sidebar-item active" data-tab="home" onclick="switchTab('home', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-8 9 8"/><path d="M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10"/></svg>
+                <span>Home</span>
+            </button>
+            <button class="sidebar-item" data-tab="progress" onclick="switchTab('progress', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                <span>Activity</span>
+            </button>
+            <button class="sidebar-item sidebar-item-add" onclick="openAddModal()">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>
+                <span>Log Meal</span>
+            </button>
+            <button class="sidebar-item" data-tab="training" onclick="switchTab('training', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5L17.5 17.5M6.5 17.5L17.5 6.5"/><circle cx="6.5" cy="6.5" r="3.5"/><circle cx="17.5" cy="17.5" r="3.5"/><circle cx="6.5" cy="17.5" r="3.5"/><circle cx="17.5" cy="6.5" r="3.5"/></svg>
+                <span>Training</span>
+            </button>
+            <button class="sidebar-item" data-tab="profile" onclick="switchTab('profile', this)">
+                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a6 6 0 0112 0v1"/></svg>
+                <span>Profile</span>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <p class="text-[10px] text-gray-600">CalTrack &mdash; Free</p>
+        </div>
+    </nav>
+
+    <!-- Main content area -->
+    <div class="main-content">
+        <div class="content-container">
+
+    <!-- Scrollable content area -->
+    <div id="app-content" class="overflow-y-auto overflow-x-hidden" style="padding-bottom:90px;min-height:100vh">
+
+        <!-- HOME TAB -->
+        <div id="tab-home" class="tab-content active">
+            <!-- Header: greeting + date + avatar -->
+            <div class="flex items-center justify-between px-5 pt-4 pb-0.5">
+                <div class="flex items-center gap-3">
+                    <img src="/static/logo.svg" alt="CalTrack" class="w-9 h-9 shrink-0 border-2 border-[#D85A30]">
+                    <div>
+                        <p class="text-xs text-gray-400 tracking-wide">Good morning</p>
+                        <p class="text-[26px] font-bold text-white leading-tight" id="today-date"></p>
+                    </div>
+                </div>
+                <div onclick="switchTab('profile', document.querySelector('[data-tab=profile]'))"
+                    class="w-10 h-10 shrink-0 cursor-pointer transition-opacity overflow-hidden border-2 border-[#2A2A2A] hover:opacity-80"
+                    {% if profile and profile.avatar_url %}{% endif %}>
+                    {% if profile and profile.avatar_url %}
+                    <img src="{{ profile.avatar_url }}" alt="avatar" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-10 h-10 bg-[#1A1A1A] border-2 border-[#FF6B3D] flex items-center justify-center text-base font-black text-white">
+                        {{ user.username[:1].upper() }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="dashboard-content">
+                {% include "partials/dashboard_content.html" %}
+            </div>
+
+            <!-- Water tracker -->
+            <div class="px-4 pb-3">
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Water</p>
+                <div class="dark-card px-5 py-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 flex items-center justify-center border-2 border-[#4A9EFF] bg-[#0A0A0A]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2.5"><path d="M12 2C12 2 6 10 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-5-6-13-6-13z"/></svg>
+                            </div>
+                            <span class="text-base font-bold text-white">Intake</span>
+                        </div>
+                        <span class="text-sm font-bold text-gray-400"><span id="water-count">0</span> / 8 glasses</span>
+                    </div>
+                    <div id="water-drops" class="flex gap-2 flex-wrap"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PROGRESS TAB -->
+        <div id="tab-progress" class="tab-content">
+            <div id="activity-root">
+                {% include "partials/activity_content.html" %}
+            </div>
+        </div>
+
+        <!-- TRAINING TAB -->
+        <div id="tab-training" class="tab-content flex flex-col" style="min-height:calc(100vh - 100px);">
+            <div id="training-root" class="flex flex-col flex-1">
+                {% include "partials/training_content.html" %}
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="tab-profile" class="tab-content">
+            <div class="px-4 pt-4 pb-6">
+                <!-- User card -->
+                <div class="dark-card p-4 mb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="relative shrink-0" onclick="document.getElementById('photo-input').click()">
+                            {% if profile and profile.avatar_url %}
+                            <img src="{{ profile.avatar_url }}" alt="avatar" class="w-16 h-16 object-cover hover:opacity-80 transition-opacity cursor-pointer border-2 border-[#2A2A2A]">
+                            {% else %}
+                            <div class="w-16 h-16 bg-[#FF6B3D] flex items-center justify-center text-2xl font-black text-white cursor-pointer hover:opacity-80 transition-opacity">
+                                {{ user.username[:1].upper() }}
+                            </div>
+                            {% endif %}
+                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-[#1A1A1A] border-2 border-[#2A2A2A] flex items-center justify-center">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6B3D" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            </div>
+                            <form id="photo-form" method="post" action="/profile/photo" enctype="multipart/form-data" style="display:none">
+                                <input type="file" id="photo-input" name="photo" accept="image/*" onchange="document.getElementById('photo-form').submit()">
+                            </form>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-lg font-black text-white">{{ user.username }}</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+                                {% if profile %}
+                                {{ profile.goal_type|replace("_", " ") | capitalize }} &middot; {{ profile.activity_level|replace("_", " ") | capitalize }}
+                                {% else %}
+                                Maintain &middot; Moderate
+                                {% endif %}
+                            </p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                {% if profile %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 border-2 border-[#2ECC71] text-[#2ECC71] text-[10px] font-black">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#2ECC71" stroke="none"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                                    {{ "%.1f"|format(profile.weight) }} kg
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 border-2 border-[#A78BFA] text-[#A78BFA] text-[10px] font-black">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#A78BFA" stroke="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    {{ profile.age }} yrs
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 border-2 border-[#F0B429] text-[#F0B429] text-[10px] font-black">
+                                    {{ "%.1f"|format(profile.height) }} cm
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick stats row -->
+                {% set total_meals = meals|length %}
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    <div class="profile-stat dark-card p-2.5 text-center">
+                        <p class="text-lg font-black text-white">{{ total_meals }}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Meals</p>
+                    </div>
+                    <div class="profile-stat dark-card p-2.5 text-center">
+                        <p class="text-lg font-black text-white">{{ "%.0f"|format(calories_burned) }}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Burned</p>
+                    </div>
+                    <div class="profile-stat dark-card p-2.5 text-center">
+                        <p class="text-lg font-black text-white">{{ today_workouts|length }}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Exercises</p>
+                    </div>
+                    <div class="profile-stat dark-card p-2.5 text-center">
+                        <p class="text-lg font-black text-white">{{ streak }}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Streak</p>
+                    </div>
+                </div>
+
+                <!-- Macro goals with today's progress -->
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Today's Macros</p>
+                <div class="dark-card p-3.5 mb-4">
+                    {% set macro_targets = [
+                        ("Calories", total_calories, goals.calorie_target, "#FF6B3D"),
+                        ("Protein", total_protein, goals.protein_target, "#2ECC71"),
+                        ("Carbs", total_carbs, goals.carbs_target, "#F0B429"),
+                        ("Fat", total_fat, goals.fat_target, "#A78BFA"),
+                    ] %}
+                    {% for label, current, target, color in macro_targets %}
+                    {% set pct = (current / target * 100) | round %}
+                    {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+                    <div class="mb-2.5 last:mb-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-white">{{ label }}</span>
+                            <span class="text-xs font-bold text-gray-400 tabular-nums">{{ "%.0f"|format(current) }} / {{ "%.0f"|format(target) }} <span class="text-[9px]">
+                                {% if label == "Calories" %}kcal{% else %}g{% endif %}</span></span>
+                        </div>
+                        <div class="macro-bar-track h-2.5">
+                            <div class="macro-bar-fill h-full" style="width:{{ pct }}%;background:{{ color }}"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Workout Notes / Planner -->
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Workout Planner</p>
+                <div class="dark-card p-3.5 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-white">Notes for today</p>
+                        <input type="date" id="note-date" value="{{ selected_date }}"
+                            onchange="loadNote(this.value)"
+                            class="bg-transparent border-2 border-[#2A2A2A] px-2 py-1 text-white text-[10px] font-bold"
+                            style="color-scheme:dark;max-width:130px">
+                    </div>
+                    <div id="note-content" hx-get="/note?d={{ selected_date }}" hx-trigger="revealed" hx-swap="innerHTML"></div>
+                </div>
+
+                <!-- Settings -->
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Settings</p>
+                <div class="dark-card overflow-hidden">
+                    <div onclick="openRemindersModal()" class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
+                        <div class="flex items-center gap-3">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B3D" stroke-width="2.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                            <span class="text-sm font-bold text-white">Reminders</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                    <a href="/export" download
+                        class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors no-underline">
+                        <div class="flex items-center gap-3">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span class="text-sm font-bold text-white">Export data</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    <form method="post" action="/logout" onclick="this.submit()" class="settings-row flex items-center justify-between px-4 py-3.5 border-b-2 border-[#2A2A2A] cursor-pointer hover:bg-[#222] transition-colors">
+                        <div class="flex items-center gap-3">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            <span class="text-sm font-bold text-red-500">Sign out</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </form>
+                </div>
+
+                <!-- Credits -->
+                <div class="mt-4 pt-4 border-t-2 border-[#1E1E1E] text-center px-2">
+                    <a href="https://www.instagram.com/theodoesgame/" target="_blank" rel="noopener noreferrer"
+                        class="btn-lift inline-flex items-center gap-2 px-4 py-2.5 border-2 border-[#2A2A2A] text-gray-400 hover:text-white hover:border-[#FF6B3D] transition-colors no-underline mb-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+                        <span class="text-xs font-bold uppercase tracking-wider">Follow @theodoesgame</span>
+                    </a>
+                    <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">
+                        Built by <span class="text-gray-400">Theo</span>
+                    </p>
+                    <p class="text-[9px] text-gray-600 mt-1">
+                        &copy; 2026 CalTrack &mdash; Free for everyone. No ads, no tracking, no paywalls.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Add FAB -->
-    <button
-        onclick="document.getElementById('add-modal').classList.remove('hidden')"
-        class="fixed bottom-8 right-6 w-14 h-14 bg-warm-900 hover:bg-warm-800 text-cream rounded-full shadow-lg shadow-warm-900/20 flex items-center justify-center text-2xl active:scale-90 transition-all duration-200"
-    >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
+</div>
+</div>
+
+<!-- Fixed Bottom Navigation -->
+<nav class="bottom-nav">
+    <button class="nav-item active" data-tab="home" onclick="switchTab('home', this)">
+        <div class="nav-icon-bg">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-8 9 8"/><path d="M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10"/></svg>
+        </div>
     </button>
-
-    <!-- Add Modal -->
-    <div id="add-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center">
-        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="relative bg-white rounded-t-3xl w-full max-w-lg p-6 pb-10 animate-slide-up">
-            <div class="flex items-center justify-between mb-5">
-                <h2 class="text-lg font-semibold text-warm-900">Add Meal</h2>
-                <button onclick="closeModal()" class="text-warm-300 hover:text-warm-500 transition-colors p-1">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Search — standalone, outside form -->
-            <div class="relative mb-4">
-                <label class="block text-sm font-medium text-warm-600 mb-1.5">Food</label>
-                <input type="text" id="food-search" placeholder="Search or type a food..."
-                    autocomplete="off"
-                    class="w-full px-4 py-3 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors placeholder:text-warm-300">
-                <div id="food-results-container" class="relative"></div>
-            </div>
-
-            <form
-                hx-post="/meals"
-                hx-target="#dashboard-content"
-                hx-swap="innerHTML"
-                hx-on::after-request="onMealAdded(this)"
-                class="space-y-4"
-            >
-                <input type="hidden" name="name" id="f-name">
-
-                <!-- Meal Type -->
-                <div>
-                    <label class="block text-sm font-medium text-warm-600 mb-1.5">Meal</label>
-                    <div class="grid grid-cols-4 gap-2" id="meal-type-select">
-                        {% for mt in [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snack")] %}
-                        <label class="meal-type-label flex items-center justify-center px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 transition-colors cursor-pointer text-sm font-medium {% if mt[0] == 'snack' %}active{% endif %}">
-                            <input type="radio" name="meal_type" value="{{ mt[0] }}" {% if mt[0] == 'snack' %}checked{% endif %} class="hidden" onchange="this.closest('.meal-type-label').parentElement.querySelectorAll('.meal-type-label').forEach(l => l.classList.remove('active')); this.closest('.meal-type-label').classList.add('active')">
-                            {{ mt[1] }}
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Macros row -->
-                <div class="grid grid-cols-3 gap-2.5">
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 mb-1">Calories</label>
-                        <input type="number" name="calories" id="f-calories" step="0.1" min="0" required
-                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 mb-1">Protein</label>
-                        <input type="number" name="protein" id="f-protein" step="0.1" min="0" value="0"
-                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 mb-1">Carbs</label>
-                        <input type="number" name="carbs" id="f-carbs" step="0.1" min="0" value="0"
-                            class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-warm-500 mb-1">Fat</label>
-                    <input type="number" name="fat" id="f-fat" step="0.1" min="0" value="0"
-                        class="w-full px-3 py-2.5 bg-warm-50 rounded-xl border border-warm-200/60 focus:border-warm-400 focus:ring-0 transition-colors text-sm tabular-nums">
-                </div>
-
-                <button type="submit"
-                    class="w-full py-3.5 bg-warm-900 hover:bg-warm-800 text-cream rounded-xl font-medium active:scale-[0.98] transition-all duration-200 mt-2">
-                    Log Meal
-                </button>
-            </form>
+    <button class="nav-item" data-tab="progress" onclick="switchTab('progress', this)">
+        <div class="nav-icon-bg">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+    </button>
+    <button class="nav-item-add" onclick="openAddModal()" aria-label="Add meal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>
+    </button>
+    <button class="nav-item" data-tab="training" onclick="switchTab('training', this)">
+        <div class="nav-icon-bg">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5L17.5 17.5M6.5 17.5L17.5 6.5"/><circle cx="6.5" cy="6.5" r="3.5"/><circle cx="17.5" cy="17.5" r="3.5"/><circle cx="6.5" cy="17.5" r="3.5"/><circle cx="17.5" cy="6.5" r="3.5"/></svg>
+        </div>
+    </button>
+    <button class="nav-item" data-tab="profile" onclick="switchTab('profile', this)">
+        <div class="nav-icon-bg">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a6 6 0 0112 0v1"/></svg>
+        </div>
+    </button>
+</nav>
+<div id="reminders-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 bg-[#080808] modal-enter" onclick="closeRemindersModal()"></div>
+    <div class="relative bg-[#0A0A0A] max-w-md w-full max-h-[80vh] overflow-y-auto border-2 border-[#2A2A2A] border-b-0 animate-slide-up">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3 sticky top-0 bg-[#0A0A0A] z-10 border-b-2 border-[#2A2A2A]">
+            <h2 class="text-base font-black text-white uppercase tracking-wider">Reminders</h2>
+            <button onclick="closeRemindersModal()" class="text-gray-400 hover:text-white transition-colors p-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="py-1" id="reminders-body">
+            {% include "partials/reminders_list.html" %}
+        </div>
+        <div class="px-5 py-3 border-t-2 border-[#2A2A2A] bg-[#0A0A0A]">
+            <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                Reminders fire when this tab is open. Grant notification permission in your browser to get desktop alerts.
+            </p>
         </div>
     </div>
 </div>
 
 <script>
+window.REMINDERS = {{ reminders | tojson | safe }};
+
+function openRemindersModal() { document.getElementById('reminders-modal').classList.remove('hidden'); }
+function closeRemindersModal() { document.getElementById('reminders-modal').classList.add('hidden'); }
+
+// Check reminders every 30s
+let lastNotifiedMinute = {};
+
+function checkReminders() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const currentTime = hh + ':' + mm;
+
+    if (!window.REMINDERS) return;
+
+    window.REMINDERS.forEach(function(r) {
+        if (!r.enabled) return;
+        if (r.time !== currentTime) return;
+        const key = r.id + '-' + currentTime;
+        if (lastNotifiedMinute[key]) return;
+        lastNotifiedMinute[key] = true;
+        setTimeout(function() { delete lastNotifiedMinute[key]; }, 61000);
+
+        // In-app toast
+        showToast(r.label);
+
+        // Browser notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Time to log!', { body: r.label, icon: '/static/favicon.ico' });
+        }
+    });
+}
+
+function showToast(msg) {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-notification';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function() {
+        t.style.opacity = '1';
+        t.style.transform = 'translateY(0)';
+    });
+    setTimeout(function() {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(20px)';
+        setTimeout(function() { t.remove(); }, 400);
+    }, 4000);
+}
+
+// Request notification permission on first interaction
+document.addEventListener('click', function requestNotif() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+}, { once: true });
+
+setInterval(checkReminders, 30000);
+setTimeout(checkReminders, 2000);
+</script>
+
+<!-- Add Meal Modal (advanced) -->
+<div id="add-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 bg-black/60 modal-enter" onclick="closeAddModal()"></div>
+    <div class="relative bg-[#141414]  w-full max-w-md p-5 pb-8 animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-white">Log meal</h2>
+            <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-400 transition-colors p-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="relative mb-3">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Food</label>
+            <input type="text" id="food-search" placeholder="Search or type a food..."
+                autocomplete="off"
+                class="w-full px-3.5 py-2.5 dark-card  text-sm placeholder:text-gray-400 focus:outline-none focus:border-[#FF6B3D] transition-colors"
+                oninput="document.getElementById('f-name').value = this.value">
+            <div id="food-results-container" class="relative"></div>
+        </div>
+
+        <form hx-post="/meals" hx-target="#dashboard-content" hx-swap="innerHTML" hx-on::after-request="onMealAdded(this)" class="space-y-3">
+            <input type="hidden" name="name" id="f-name">
+
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Meal</label>
+                <div class="grid grid-cols-4 gap-1.5" id="meal-type-select">
+                    {% for mt in [("breakfast", "Breakfast"), ("lunch", "Lunch"), ("dinner", "Dinner"), ("snack", "Snack")] %}
+                    <label class="opt-btn flex items-center justify-center px-2 py-2 dark-card  cursor-pointer text-xs font-medium">
+                        <input type="radio" name="meal_type" value="{{ mt[0] }}" {% if mt[0] == 'snack' %}checked{% endif %} class="hidden"
+                            onchange="this.closest('#meal-type-select').querySelectorAll('.opt-btn').forEach(l=>l.classList.remove('active')); this.closest('.opt-btn').classList.add('active')">
+                        {{ mt[1] }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Servings</label>
+                <div class="flex gap-2 items-center">
+                    <input type="number" name="servings" id="f-servings" value="1" min="0.25" max="100" step="0.25"
+                        class="w-16 px-2 py-2 dark-card  text-sm tabular-nums text-center"
+                        oninput="updateMacroPreview()">
+                    <span class="text-xs text-gray-400" id="serving-unit-display">serving(s)</span>
+                </div>
+                <div class="flex gap-1.5 mt-1.5 flex-wrap" id="serving-size-options">
+                    <button type="button" onclick="setServing('g (100g)', 100)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">100g</button>
+                    <button type="button" onclick="setServing('cup (240ml)', 240)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 cup</button>
+                    <button type="button" onclick="setServing('piece', 0)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 piece</button>
+                    <button type="button" onclick="setServing('tbsp (15ml)', 15)" class="serving-btn text-[11px] px-2.5 py-1.5 dark-card  text-gray-400 hover:border-[#FF6B3D] transition-colors">1 tbsp</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5">
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Cal</label>
+                    <input type="number" name="calories" id="f-calories" step="0.1" min="0" value="0" required
+                        class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Protein</label>
+                    <input type="number" name="protein" id="f-protein" step="0.1" min="0" value="0"
+                        class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Carbs</label>
+                    <input type="number" name="carbs" id="f-carbs" step="0.1" min="0" value="0"
+                        class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-medium text-gray-400 mb-0.5">Fat</label>
+                    <input type="number" name="fat" id="f-fat" step="0.1" min="0" value="0"
+                        class="w-full px-2 py-2 dark-card  text-sm tabular-nums text-center">
+                </div>
+            </div>
+
+            <div class="text-[11px] text-gray-400 text-center" id="macro-preview"></div>
+
+            <button type="submit" class="w-full py-3 bg-[#FF6B3D] hover:bg-[#D85A30] text-white  font-medium text-sm active:scale-[0.98] transition-all duration-200">
+                Log Meal
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// ── Tab switching ──────────────────────────
+
+function switchTab(tabId, btn) {
+    // Remove active class from all tabs and nav items
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Add active class to new tab
+    const tab = document.getElementById('tab-' + tabId);
+    if (tab) tab.classList.add('active');
+    
+    if (btn) {
+        btn.classList.add('active');
+    }
+    
+    // Scroll to top with smooth behavior
+    const appContent = document.getElementById('app-content');
+    if (appContent) {
+        appContent.scrollTop = 0;
+    }
+    
+    // Load fresh content for tabs
+    if (tabId === 'home') {
+        htmx.ajax('GET', '/meals', { target: '#dashboard-content', swap: 'innerHTML' });
+    } else if (tabId === 'progress') {
+        htmx.ajax('GET', '/activity', { target: '#activity-root', swap: 'innerHTML' });
+    }
+}
+
+// ── Modal food search ──────────────────────
+
 let searchTimeout;
 
 document.getElementById('food-search').addEventListener('input', function() {
@@ -111,25 +505,121 @@ document.getElementById('food-search').addEventListener('input', function() {
     }, 300);
 });
 
-function selectFood(name, cal, pro, carbs, fat) {
+// ── Serving & macro helpers ────────────────
+
+let currentBase = { cal: 0, pro: 0, carbs: 0, fat: 0 };
+let currentServingG = 100;
+let currentBaseServingG = 100;
+
+function selectFood(name, cal, pro, carbs, fat, servingG, servingUnit) {
     document.getElementById('food-search').value = name;
     document.getElementById('f-name').value = name;
+    currentBase = { cal, pro, carbs, fat };
+    currentBaseServingG = servingG || 100;
+    currentServingG = servingG || 100;
+    document.getElementById('food-results-container').innerHTML = '';
+    document.getElementById('serving-unit-display').textContent = servingUnit ? servingUnit + '(s)' : 'serving(s)';
+    updateMacroPreview();
+}
+
+function setServing(unit, grams) {
+    currentServingG = grams > 0 ? grams : currentBaseServingG;
+    document.getElementById('serving-unit-display').textContent = unit + '(s)';
+    document.querySelectorAll('.serving-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    updateMacroPreview();
+}
+
+function updateMacroPreview() {
+    if (!currentBase || typeof currentBase.cal !== 'number') return;
+    const servings = parseFloat(document.getElementById('f-servings').value) || 1;
+    const factor = servings * (currentServingG / currentBaseServingG);
+    const cal = Math.round(currentBase.cal * factor * 10) / 10;
+    const pro = Math.round(currentBase.pro * factor * 10) / 10;
+    const carbs = Math.round(currentBase.carbs * factor * 10) / 10;
+    const fat = Math.round(currentBase.fat * factor * 10) / 10;
     document.getElementById('f-calories').value = cal;
     document.getElementById('f-protein').value = pro;
     document.getElementById('f-carbs').value = carbs;
     document.getElementById('f-fat').value = fat;
-    document.getElementById('food-results-container').innerHTML = '';
+    document.getElementById('macro-preview').textContent = servings + ' × ' + currentServingG + 'g = ' + cal + ' kcal';
 }
 
-function closeModal() {
+// ── Favourite toggle ───────────────────────
+
+function toggleFav(foodId, btn) {
+    htmx.ajax('POST', '/favourites/' + foodId, { target: btn, swap: 'outerHTML' });
+}
+
+// ── Modal ──────────────────────────────────
+
+function openAddModal() {
+    document.getElementById('add-modal').classList.remove('hidden');
+}
+
+function closeAddModal() {
     document.getElementById('add-modal').classList.add('hidden');
 }
 
 function onMealAdded(form) {
     form.reset();
     document.getElementById('food-search').value = '';
-    closeModal();
+    closeAddModal();
     document.getElementById('food-results-container').innerHTML = '';
+    currentBase = { cal: 0, pro: 0, carbs: 0, fat: 0 };
+}
+
+// ── Water tracker ──────────────────────────
+
+let waterCount = parseInt(localStorage.getItem('waterCount') || '0', 10);
+
+function buildWater() {
+    const c = document.getElementById('water-drops');
+    if (!c) return;
+    c.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const d = document.createElement('div');
+        const filled = i < waterCount;
+        d.className = 'water-drop';
+        d.style.cssText = 'width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:' + (filled ? '#1A4A7A' : '#1C1C1C') + ';border:.5px solid ' + (filled ? '#4A9EFF' : '#2A2A2A') + ';';
+        d.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="' + (filled ? '#4A9EFF' : '#6B6B6B') + '" stroke="none"><path d="M12 2C12 2 6 10 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-5-6-13-6-13z"/></svg>';
+        d.addEventListener('click', function(idx) {
+            return function() {
+                waterCount = (waterCount === idx + 1) ? idx : idx + 1;
+                localStorage.setItem('waterCount', waterCount);
+                buildWater();
+            };
+        }(i));
+        c.appendChild(d);
+    }
+    document.getElementById('water-count').textContent = waterCount;
+}
+
+// ── Set today's date ─────────────────────
+(function() {
+    const d = new Date();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const el = document.getElementById('today-date');
+    if (el) el.textContent = 'Today, ' + months[d.getMonth()] + ' ' + d.getDate();
+})();
+
+document.addEventListener('DOMContentLoaded', buildWater);
+
+document.getElementById('food-search').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') e.preventDefault();
+});
+
+// Auto-refresh dashboard after workout changes
+document.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'training-root') {
+        htmx.ajax('GET', '/meals', { target: '#dashboard-content', swap: 'innerHTML' });
+    }
+});
+
+function loadNote(dateStr) {
+    htmx.ajax('GET', '/note?d=' + dateStr, { target: '#note-content', swap: 'innerHTML' });
 }
 </script>
+</div>
 {% endblock %}
+

@@ -1,13 +1,33 @@
+import csv, io
 from pathlib import Path
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import date, timedelta
 
-from database import init_db, get_db, search_foods
+from database import (
+    init_db, get_db, search_foods,
+    create_user, authenticate_user,
+    create_session, get_user_by_token,
+    delete_session, get_or_create_goals, update_goals,
+    create_profile, get_profile,
+    update_profile_avatar,
+    add_favourite_food, remove_favourite_food,
+    get_favourite_foods, is_favourite,
+    get_recent_foods,
+    get_reminders, save_reminder,
+    get_exercises, get_muscle_groups, get_exercise_by_id,
+    log_workout, get_today_workouts, delete_workout,
+    complete_workout, get_calories_burned_today, get_calories_burned_by_date, get_workout_week_data,
+    get_week_data_for_date, get_workout_week_data_for_date,
+    get_total_volume_today, get_workout_stats, get_month_heatmap, get_net_calories_today,
+    get_heatmap_grid,
+    get_note, save_note,
+)
 from models import MealCreate, Goals
+from tdee import calculate_targets
 
 BASE_DIR = Path(__file__).parent
 
@@ -23,47 +43,267 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
-async def get_goals() -> Goals:
-    db = await get_db()
-    row = await db.execute_fetchall("SELECT * FROM goals WHERE id = 1")
-    await db.close()
-    if row:
-        r = row[0]
-        return Goals(
-            calorie_target=r["calorie_target"],
-            protein_target=r["protein_target"],
-            carbs_target=r["carbs_target"],
-            fat_target=r["fat_target"],
-        )
-    return Goals()
+async def get_current_user(request: Request) -> dict | None:
+    token = request.cookies.get("session")
+    if not token:
+        return None
+    return await get_user_by_token(token)
 
 
-async def get_today_meals(d: str | None = None) -> list[dict]:
+def require_user(user: dict | None):
+    if not user:
+        raise HTTPException(status_code=303, detail="Not authenticated")
+
+
+async def get_goals_typed(user_id: int) -> Goals:
+    g = await get_or_create_goals(user_id)
+    return Goals(
+        calorie_target=g["calorie_target"],
+        protein_target=g["protein_target"],
+        carbs_target=g["carbs_target"],
+        fat_target=g["fat_target"],
+    )
+
+
+async def get_today_meals(user_id: int, d: str | None = None) -> list[dict]:
     if d is None:
         d = date.today().isoformat()
     db = await get_db()
     rows = await db.execute_fetchall(
-        "SELECT * FROM meals WHERE date = ? ORDER BY created_at DESC", (d,)
+        "SELECT * FROM meals WHERE user_id = ? AND date = ? ORDER BY created_at DESC",
+        (user_id, d),
     )
     await db.close()
     return [dict(r) for r in rows]
 
 
+async def get_week_data(user_id: int) -> list[float]:
+    today = date.today()
+    db = await get_db()
+    week = []
+    for i in range(6, -1, -1):
+        d = (today - timedelta(days=i)).isoformat()
+        rows = await db.execute_fetchall(
+            "SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date = ?",
+            (user_id, d),
+        )
+        week.append(rows[0]["total"] or 0)
+    await db.close()
+    return week
+
+
+async def get_streak(user_id: int) -> int:
+    db = await get_db()
+    streak = 0
+    d = date.today()
+    for i in range(60):
+        ds = d.isoformat()
+        rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM meals WHERE user_id = ? AND date = ?",
+            (user_id, ds),
+        )
+        if rows[0]["cnt"] > 0:
+            streak += 1
+            d -= timedelta(days=1)
+        else:
+            break
+    await db.close()
+    return streak
+
+
+async def get_avg_calories(user_id: int, days: int = 7) -> float:
+    today = date.today()
+    start = (today - timedelta(days=days - 1)).isoformat()
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        "SELECT AVG(daily) as avg FROM (SELECT SUM(calories) as daily FROM meals WHERE user_id = ? AND date >= ? GROUP BY date)",
+        (user_id, start),
+    )
+    await db.close()
+    return rows[0]["avg"] or 0
+
+
+# ── Auth pages ──────────────────────────────────────────────
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    user = await get_current_user(request)
+    if user:
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse(request, "login.html", {"request": request})
+
+
+@app.post("/login")
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    user = await authenticate_user(username, password)
+    if not user:
+        return templates.TemplateResponse(
+            request, "login.html",
+            {"request": request, "error": "Invalid username or password"},
+            status_code=400,
+        )
+    token = await create_session(user["id"])
+    resp = RedirectResponse("/", status_code=302)
+    resp.set_cookie(key="session", value=token, httponly=True, max_age=86400 * 30, samesite="lax")
+    return resp
+
+
+@app.get("/signup", response_class=HTMLResponse)
+async def signup_page(request: Request):
+    user = await get_current_user(request)
+    if user:
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse(request, "signup.html", {"request": request})
+
+
+@app.post("/signup")
+async def signup(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    if len(username) < 3:
+        return templates.TemplateResponse(
+            request, "signup.html",
+            {"request": request, "error": "Username must be at least 3 characters"},
+            status_code=400,
+        )
+    if len(password) < 6:
+        return templates.TemplateResponse(
+            request, "signup.html",
+            {"request": request, "error": "Password must be at least 6 characters"},
+            status_code=400,
+        )
+    user = await create_user(username, password)
+    if not user:
+        return templates.TemplateResponse(
+            request, "signup.html",
+            {"request": request, "error": "Username already taken"},
+            status_code=400,
+        )
+    token = await create_session(user["id"])
+    resp = RedirectResponse("/onboarding", status_code=302)
+    resp.set_cookie(key="session", value=token, httponly=True, max_age=86400 * 30, samesite="lax")
+    return resp
+
+
+@app.post("/logout")
+async def logout(request: Request):
+    token = request.cookies.get("session")
+    if token:
+        await delete_session(token)
+    resp = RedirectResponse("/login", status_code=302)
+    resp.delete_cookie("session")
+    return resp
+
+
+# ── Onboarding ──────────────────────────────────────────────
+
+@app.get("/onboarding", response_class=HTMLResponse)
+async def onboarding_page(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    profile = await get_profile(user["id"])
+    if profile and profile.get("onboarded"):
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse(request, "onboarding.html", {
+        "request": request,
+        "user": user,
+    })
+
+
+@app.post("/onboarding")
+async def onboarding_submit(
+    request: Request,
+    age: int = Form(...),
+    weight: float = Form(...),
+    height: float = Form(...),
+    gender: str = Form(...),
+    activity_level: str = Form(...),
+    goal_type: str = Form(...),
+):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    await create_profile(user["id"], age, weight, height, gender, activity_level, goal_type)
+
+    targets = calculate_targets(weight, height, age, gender, activity_level, goal_type)
+    await update_goals(
+        user["id"],
+        targets["calorie_target"],
+        targets["protein_target"],
+        targets["carbs_target"],
+        targets["fat_target"],
+    )
+
+    return RedirectResponse("/", status_code=302)
+
+
+# ── Protected routes ────────────────────────────────────────
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request, d: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    profile = await get_profile(user["id"])
+    if not profile or not profile.get("onboarded"):
+        return RedirectResponse("/onboarding", status_code=302)
     if d is None:
         d = date.today().isoformat()
-    meals = await get_today_meals(d)
-    goals = await get_goals()
+    meals = await get_today_meals(user["id"], d)
+    goals = await get_goals_typed(user["id"])
     total_cal = sum(m["calories"] for m in meals)
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    recent = await get_recent_foods(user["id"], 5)
+    favourites = await get_favourite_foods(user["id"], 5)
+    reminders = await get_reminders(user["id"])
+    avg_calories = await get_avg_calories(user["id"])
+    streak = await get_streak(user["id"])
+    week_data = await get_week_data(user["id"])
+    bmi_val = 0
+    bmi_label = ""
+    bmi_desc = ""
+    if profile:
+        h_m = profile["height"] / 100
+        bmi_val = round(profile["weight"] / (h_m * h_m), 1)
+        if bmi_val < 18.5:
+            bmi_label = "Underweight"
+            bmi_desc = "Consider gaining weight"
+        elif bmi_val < 25:
+            bmi_label = "Normal"
+            bmi_desc = "Healthy range"
+        elif bmi_val < 30:
+            bmi_label = "Overweight"
+            bmi_desc = "Consider losing weight"
+        else:
+            bmi_label = "Obese"
+            bmi_desc = "Consult a professional"
+    calories_burned = await get_calories_burned_today(user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    workout_week = await get_workout_week_data(user["id"])
+    muscle_groups = await get_muscle_groups()
+    all_exercises = await get_exercises()
+    total_volume = await get_total_volume_today(user["id"])
+    workout_stats = await get_workout_stats(user["id"])
+    heatmap_grid = await get_heatmap_grid(user["id"])
+    net_cals = await get_net_calories_today(user["id"])
+    today_iso = date.today().isoformat()
     return templates.TemplateResponse(
         request,
         "index.html",
         {
             "request": request,
+            "user": user,
+            "profile": profile,
             "meals": meals,
             "goals": goals,
             "total_calories": total_cal,
@@ -71,35 +311,68 @@ async def index(request: Request, d: str | None = None):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "today_iso": today_iso,
+            "recent_foods": recent,
+            "favourite_foods": favourites,
+            "avg_calories": round(avg_calories),
+            "streak": streak,
+            "week_data": week_data,
+            "bmi": bmi_val,
+            "bmi_label": bmi_label,
+            "bmi_desc": bmi_desc,
+            "reminders": reminders,
+            "calories_burned": round(calories_burned),
+            "today_workouts": today_workouts,
+            "workouts": today_workouts,
+            "workout_week": workout_week,
+            "muscle_groups": muscle_groups,
+            "all_exercises": all_exercises,
+            "total_volume": round(total_volume),
+            "workout_stats": workout_stats,
+            "heatmap_grid": heatmap_grid,
+            "net_eaten": round(net_cals["eaten"]),
+            "net_burned": round(net_cals["burned"]),
         },
     )
 
 
 @app.get("/foods/search", response_class=HTMLResponse)
-async def food_search(request: Request, q: str = ""):
+async def food_search(request: Request, q: str = "", compact: str = "0"):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
     results = await search_foods(q) if q else []
+    fav_ids = set()
+    for f in results:
+        if await is_favourite(user["id"], f["id"]):
+            fav_ids.add(f["id"])
     return templates.TemplateResponse(
         request,
         "partials/food_results.html",
-        {"request": request, "results": results},
+        {"request": request, "results": results, "fav_ids": fav_ids, "compact": compact == "1"},
     )
 
 
 @app.get("/meals", response_class=HTMLResponse)
 async def meal_list(request: Request, d: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
     if d is None:
         d = date.today().isoformat()
-    meals = await get_today_meals(d)
-    goals = await get_goals()
+    meals = await get_today_meals(user["id"], d)
+    goals = await get_goals_typed(user["id"])
     total_cal = sum(m["calories"] for m in meals)
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
         {
             "request": request,
+            "user": user,
             "meals": meals,
             "goals": goals,
             "total_calories": total_cal,
@@ -107,6 +380,72 @@ async def meal_list(request: Request, d: str | None = None):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
+        },
+    )
+
+
+@app.get("/activity", response_class=HTMLResponse)
+async def activity_tab(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    profile = await get_profile(user["id"])
+    goals = await get_goals_typed(user["id"])
+    avg_calories = await get_avg_calories(user["id"])
+    streak = await get_streak(user["id"])
+    week_data = await get_week_data(user["id"])
+    bmi_val = 0
+    bmi_label = ""
+    bmi_desc = ""
+    if profile:
+        h_m = profile["height"] / 100
+        bmi_val = round(profile["weight"] / (h_m * h_m), 1)
+        if bmi_val < 18.5:
+            bmi_label = "Underweight"
+            bmi_desc = "Consider gaining weight"
+        elif bmi_val < 25:
+            bmi_label = "Normal"
+            bmi_desc = "Healthy range"
+        elif bmi_val < 30:
+            bmi_label = "Overweight"
+            bmi_desc = "Consider losing weight"
+        else:
+            bmi_label = "Obese"
+            bmi_desc = "Consult a professional"
+    today_iso = date.today().isoformat()
+    meals = await get_today_meals(user["id"], today_iso)
+    total_cal = sum(m["calories"] for m in meals)
+    total_pro = sum(m["protein"] for m in meals)
+    total_carb = sum(m["carbs"] for m in meals)
+    total_fat = sum(m["fat"] for m in meals)
+    workouts = await get_today_workouts(user["id"], for_date=today_iso)
+    calories_burned = await get_calories_burned_by_date(user["id"], today_iso)
+    workout_week = await get_workout_week_data(user["id"])
+    return templates.TemplateResponse(
+        request,
+        "partials/activity_content.html",
+        {
+            "request": request,
+            "user": user,
+            "profile": profile,
+            "goals": goals,
+            "avg_calories": round(avg_calories),
+            "streak": streak,
+            "week_data": week_data,
+            "workout_week": workout_week,
+            "bmi": bmi_val,
+            "bmi_label": bmi_label,
+            "bmi_desc": bmi_desc,
+            "today_iso": today_iso,
+            "selected_date": today_iso,
+            "meals": meals,
+            "workouts": workouts,
+            "total_calories": total_cal,
+            "total_protein": total_pro,
+            "total_carbs": total_carb,
+            "total_fat": total_fat,
+            "calories_burned": round(calories_burned),
         },
     )
 
@@ -120,37 +459,38 @@ async def add_meal(
     carbs: float = Form(0),
     fat: float = Form(0),
     meal_type: str = Form("snack"),
+    servings: float = Form(1),
     d: str | None = Form(None),
 ):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
     if d is None:
         d = date.today().isoformat()
-    meal = MealCreate(
-        name=name,
-        calories=calories,
-        protein=protein,
-        carbs=carbs,
-        fat=fat,
-        meal_type=meal_type,
-        date=d,
-    )
+    try:
+        meal = MealCreate(name=name, calories=calories, protein=protein, carbs=carbs, fat=fat, meal_type=meal_type, servings=servings, date=d)
+    except Exception as e:
+        return HTMLResponse(f'<div class="px-5 py-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 mb-3">Invalid: {e}</div>', status_code=400)
     db = await get_db()
     await db.execute(
-        "INSERT INTO meals (name, calories, protein, carbs, fat, meal_type, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (meal.name, meal.calories, meal.protein, meal.carbs, meal.fat, meal.meal_type, meal.date),
+        "INSERT INTO meals (user_id, name, calories, protein, carbs, fat, meal_type, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (user["id"], meal.name, meal.calories, meal.protein, meal.carbs, meal.fat, meal.meal_type, meal.date),
     )
     await db.commit()
     await db.close()
-    meals = await get_today_meals(d)
-    goals = await get_goals()
+    meals = await get_today_meals(user["id"], d)
+    goals = await get_goals_typed(user["id"])
     total_cal = sum(m["calories"] for m in meals)
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
         {
             "request": request,
+            "user": user,
             "meals": meals,
             "goals": goals,
             "total_calories": total_cal,
@@ -158,28 +498,37 @@ async def add_meal(
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
         },
     )
 
 
 @app.delete("/meals/{meal_id}")
 async def delete_meal(request: Request, meal_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
     db = await get_db()
-    await db.execute("DELETE FROM meals WHERE id = ?", (meal_id,))
+    rows = await db.execute_fetchall("SELECT date FROM meals WHERE id = ? AND user_id = ?", (meal_id, user["id"]))
+    d = date.today().isoformat()
+    if rows:
+        d = rows[0]["date"]
+    await db.execute("DELETE FROM meals WHERE id = ? AND user_id = ?", (meal_id, user["id"]))
     await db.commit()
     await db.close()
-    d = date.today().isoformat()
-    meals = await get_today_meals(d)
-    goals = await get_goals()
+    meals = await get_today_meals(user["id"], d)
+    goals = await get_goals_typed(user["id"])
     total_cal = sum(m["calories"] for m in meals)
     total_pro = sum(m["protein"] for m in meals)
     total_carb = sum(m["carbs"] for m in meals)
     total_fat = sum(m["fat"] for m in meals)
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
     return templates.TemplateResponse(
         request,
         "partials/dashboard_content.html",
         {
             "request": request,
+            "user": user,
             "meals": meals,
             "goals": goals,
             "total_calories": total_cal,
@@ -187,5 +536,287 @@ async def delete_meal(request: Request, meal_id: int):
             "total_carbs": total_carb,
             "total_fat": total_fat,
             "selected_date": d,
+            "calories_burned": round(calories_burned),
         },
     )
+
+
+@app.get("/export")
+async def export_data(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    db = await get_db()
+    rows = await db.execute_fetchall(
+        "SELECT date, meal_type, name, calories, protein, carbs, fat FROM meals WHERE user_id = ? ORDER BY date DESC, created_at DESC",
+        (user["id"],),
+    )
+    await db.close()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Date", "Meal Type", "Food", "Calories", "Protein (g)", "Carbs (g)", "Fat (g)"])
+    for r in rows:
+        writer.writerow([r["date"], r["meal_type"], r["name"], r["calories"], r["protein"], r["carbs"], r["fat"]])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=calorie_tracker_export.csv"},
+    )
+
+
+@app.post("/profile/photo")
+async def upload_photo(request: Request, photo: UploadFile = File(...)):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    if not photo.content_type or not photo.content_type.startswith("image/"):
+        return HTMLResponse("Invalid file type", status_code=400)
+    ext = Path(photo.filename).suffix if photo.filename else ".jpg"
+    filename = f"avatar_{user['id']}{ext}"
+    upload_dir = BASE_DIR / "static" / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    content = await photo.read()
+    with open(upload_dir / filename, "wb") as f:
+        f.write(content)
+    avatar_url = f"/static/uploads/{filename}"
+    await update_profile_avatar(user["id"], avatar_url)
+    return RedirectResponse("/", status_code=302)
+
+
+@app.post("/reminders/{reminder_id}")
+async def update_reminder(
+    request: Request,
+    reminder_id: int,
+    time: str = Form(...),
+    enabled: int = Form(0),
+):
+    user = await get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    await save_reminder(reminder_id, user["id"], time, enabled)
+    reminders = await get_reminders(user["id"])
+    return templates.TemplateResponse(
+        request, "partials/reminders_list.html",
+        {"request": request, "reminders": reminders},
+    )
+
+
+# ── Training / Workout routes ────────────────────────────
+
+@app.get("/training", response_class=HTMLResponse)
+async def training_content(request: Request, muscle: str | None = None, d: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    if d is None:
+        d = date.today().isoformat()
+    muscle_groups = await get_muscle_groups()
+    all_exercises = await get_exercises(muscle)
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": all_exercises,
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": muscle,
+        },
+    )
+
+
+@app.post("/workouts")
+async def add_workout(
+    request: Request,
+    exercise_id: int = Form(...),
+    sets: int = Form(3),
+    reps: int = Form(10),
+    weight_kg: float = Form(0),
+    d: str | None = Form(None),
+):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    if d is None:
+        d = date.today().isoformat()
+    await log_workout(user["id"], exercise_id, sets, reps, weight_kg)
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    )
+
+
+@app.delete("/workouts/{workout_id}")
+async def remove_workout(request: Request, workout_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    db = await get_db()
+    rows = await db.execute_fetchall("SELECT date FROM workouts WHERE id = ? AND user_id = ?", (workout_id, user["id"]))
+    d = date.today().isoformat()
+    if rows:
+        d = rows[0]["date"]
+    await db.close()
+    await delete_workout(workout_id, user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    )
+
+
+@app.post("/workouts/{workout_id}/complete")
+async def toggle_workout_complete(request: Request, workout_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    db = await get_db()
+    rows = await db.execute_fetchall("SELECT date FROM workouts WHERE id = ? AND user_id = ?", (workout_id, user["id"]))
+    d = date.today().isoformat()
+    if rows:
+        d = rows[0]["date"]
+    await db.close()
+    await complete_workout(workout_id, user["id"])
+    today_workouts = await get_today_workouts(user["id"])
+    calories_burned = await get_calories_burned_by_date(user["id"], d)
+    muscle_groups = await get_muscle_groups()
+    return templates.TemplateResponse(
+        request,
+        "partials/training_content.html",
+        {
+            "request": request,
+            "muscle_groups": muscle_groups,
+            "all_exercises": await get_exercises(),
+            "today_workouts": today_workouts,
+            "calories_burned": round(calories_burned),
+            "selected_muscle": None,
+        },
+    ) 
+
+
+@app.get("/day/{date}", response_class=HTMLResponse)
+async def day_detail(request: Request, date: str):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    meals = await get_today_meals(user["id"], date)
+    goals = await get_goals_typed(user["id"])
+    total_cal = sum(m["calories"] for m in meals)
+    total_pro = sum(m["protein"] for m in meals)
+    total_carb = sum(m["carbs"] for m in meals)
+    total_fat = sum(m["fat"] for m in meals)
+    workouts = await get_today_workouts(user["id"], for_date=date)
+    calories_burned = await get_calories_burned_by_date(user["id"], date)
+    return templates.TemplateResponse(
+        request,
+        "partials/day_detail.html",
+        {
+            "request": request,
+            "date": date,
+            "meals": meals,
+            "workouts": workouts,
+            "goals": goals,
+            "total_calories": total_cal,
+            "total_protein": total_pro,
+             "total_carbs": total_carb,
+             "total_fat": total_fat,
+             "calories_burned": round(calories_burned),
+         },
+     )
+
+
+@app.get("/activity-charts/{date_str}", response_class=HTMLResponse)
+async def activity_charts(request: Request, date_str: str):
+    """Return the activity charts for the week containing date_str"""
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    goals = await get_goals_typed(user["id"])
+    week_data = await get_week_data_for_date(user["id"], date_str)
+    workout_week = await get_workout_week_data_for_date(user["id"], date_str)
+    return templates.TemplateResponse(
+        request,
+        "partials/activity_charts.html",
+        {
+            "request": request,
+            "goals": goals,
+            "week_data": week_data,
+            "workout_week": workout_week,
+        },
+    )
+
+
+@app.get("/note", response_class=HTMLResponse)
+async def get_workout_note(request: Request, d: str | None = None):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("")
+    if d is None:
+        d = date.today().isoformat()
+    content = await get_note(user["id"], d)
+    return templates.TemplateResponse(
+        request,
+        "partials/note_input.html",
+        {"request": request, "date": d, "content": content},
+    )
+
+
+@app.post("/note")
+async def save_workout_note(
+    request: Request,
+    d: str = Form(...),
+    content: str = Form(""),
+):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    await save_note(user["id"], d, content)
+    return templates.TemplateResponse(
+        request,
+        "partials/note_input.html",
+        {"request": request, "date": d, "content": content},
+    )
+
+
+@app.post("/favourites/{food_id}")
+async def toggle_favourite(request: Request, food_id: int):
+    user = await get_current_user(request)
+    if not user:
+        return HTMLResponse("", status_code=401)
+    if await is_favourite(user["id"], food_id):
+        await remove_favourite_food(user["id"], food_id)
+        return HTMLResponse("☆")
+    else:
+        await add_favourite_food(user["id"], food_id)
+        return HTMLResponse("★")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-calories.db
-static/uploads/*.jpg
-static/uploads/*.png
-.env
-*.egg-info/
-dist/
-build/
