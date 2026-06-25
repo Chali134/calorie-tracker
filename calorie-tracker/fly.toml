@@ -1,5 +1,6 @@
 app = "calorie-tracker"
-primary_region = "iad"
+
+[build]
 
 [[services]]
   protocol = "tcp"
@@ -13,15 +14,6 @@ primary_region = "iad"
   [[services.ports]]
     port = 80
     handlers = ["http"]
-
-  [services.concurrency]
-    type = "requests"
-    hard_limit = 250
-    soft_limit = 200
-
-[[mounts]]
-  source = "data"
-  destination = "/data"
 
 [env]
   DB_PATH = "/data/calories.db"
